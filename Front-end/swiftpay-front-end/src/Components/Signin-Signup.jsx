@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import "./SignIn-SignUp.css"
-import {FaTwitter, FaGoogle, FaMicrosoft } from 'react-icons/fa';
+import {FaYahoo, FaGoogle, FaMicrosoft } from 'react-icons/fa';
 import register from "./../images/reg.svg"
 import Log from "./../images/log.svg"
 import { auth } from '../../Firebase/Fire.config';
@@ -9,6 +9,7 @@ import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { sendEmailVerification } from "firebase/auth";
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -47,6 +48,7 @@ const AuthForm = () => {
       const user = userCredential.user;
       console.log(user);
       toast.success("Logged in successfully!");
+      navigate('/Main');
     } catch (error) {
       const errorCode = error.code;
       const errorMessage = error.message;
@@ -83,7 +85,9 @@ const AuthForm = () => {
 
         // Set user information in cookie
         Cookies.set('user', user.displayName, { expires: 365 }); // Cookie expires in 365 days
-        Cookies.set('logedin', 'True', { expires: 365 }); // Cookie expires in 365 days
+        Cookies.set('logedin', 'True', { expires: 365 });
+         // Cookie expires in 365 days
+         navigate('/Main');
     } catch (error) {
         console.error(error.message);
         if (error.code === 'auth/email-already-in-use') {
@@ -93,6 +97,34 @@ const AuthForm = () => {
         }
     }
 }
+
+const Yahoo = async () => {
+  try {
+    const provider = new OAuthProvider('yahoo.com');
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    
+    // Check if the user's email is verified
+    if (!user.emailVerified) {
+      // Send email verification
+      await sendEmailVerification(user);
+      toast.info('Verification email sent. Please verify your email address.');
+    }
+
+    toast.success('Logged in successfully!');
+    // Set user information in cookie
+    Cookies.set('user', user.displayName, { expires: 365 }); // Cookie expires in 365 days
+    Cookies.set('logedin', 'True', { expires: 365 }); // Cookie expires in 365 days
+    navigate('/Main');
+  } catch (error) {
+    console.error(error.message);
+    if (error.code === 'auth/email-already-in-use') {
+      toast.error('The email address is already in use by another account.');
+    } else {
+      toast.error('An error occurred during Yahoo authentication. Please try again.');
+    }
+  }
+};
 
 
 
@@ -109,6 +141,7 @@ const AuthForm = () => {
       // Display success message and set user information in cookie
       toast.success('Thank you for signing up! Please check your email for verification.');
       Cookies.set('user', user, { expires: 7 }); // Cookie expires in 7 days
+      navigate('/Main');
     } catch (error) {
       const errorCode = error.code;
       const errorMessage = error.message;
@@ -139,6 +172,7 @@ const AuthForm = () => {
       const user = result.user;
       Cookies.set('user', user.displayName, { expires: 7 }); // Cookie expires in 7 days
       Cookies.set('logedin', 'True', { expires: 7 }); // Cookie expires in 7 days
+      navigate('/Main');
     } catch (error) {
       const errorCode = error.code;
       const errorMessage = error.message;
@@ -167,6 +201,8 @@ const AuthForm = () => {
   const handlePasswordChange = (e) => {
     setPasswordForSignup(e.target.value);
   };
+  const navigate=useNavigate()
+
 
   return (
     <div className="container">
@@ -176,8 +212,8 @@ const AuthForm = () => {
             <h2 className="title">Sign in</h2>
             <div className="input-field">
               <i className="fas fa-envelope"></i>
-              <input type="email" placeholder="Email" onChange={handleEmailChange} value={emailforsignup} />
-            </div>
+                <input type="email"  placeholder="Email"  onChange={handleEmailChange}  value={emailforsignup}   pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" // Email patternrequired // Required field 
+                /></div>
             <div className="input-field">
               <i className="fas fa-lock"></i>
               <input type="password" placeholder="Password" onChange={handlePasswordChange} value={passwordforsignup} />
@@ -185,8 +221,8 @@ const AuthForm = () => {
             <input type="submit" value="Login" className="btn solid" />
             <p className="social-text">Or Sign in with social platforms</p>
             <div className="social-media">
-            <a href="#"  className="social-icon">
-                <FaTwitter size={29} />
+            <a href="#" onClick={Yahoo}  className="social-icon">
+                <FaYahoo size={29} />
               </a>
               <a href="#" onClick={google} className="social-icon">
                 <FaGoogle size={29} />
@@ -209,8 +245,8 @@ const AuthForm = () => {
             <input type="submit" className="btn" value="Sign up" />
             <p className="social-text">Or Sign up with social platforms</p>
             <div className="social-media">
-            <a href="#" className="social-icon">
-                <FaTwitter size={29} />
+            <a href="#" onClick={Yahoo} className="social-icon">
+                <FaYahoo size={29} />
               </a>
               <a href="#" onClick={google}  className="social-icon">
                 <FaGoogle size={29} />
