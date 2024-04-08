@@ -1,8 +1,1 @@
-# React + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+SwiftPay is a secure and convenient payment app that allows you to easily send and receive money from friends, family, and businesses. With SwiftPay, you can quickly split bills, pay for purchases, and manage your finances, all from the convenience of your mobile device. Our app prioritizes security, ensuring that your transactions are safe and protected. Experience hassle-free payments with SwiftPay.this is all about your app
