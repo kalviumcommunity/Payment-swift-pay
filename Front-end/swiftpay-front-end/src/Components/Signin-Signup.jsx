@@ -4,7 +4,7 @@ import {FaTwitter, FaGoogle, FaMicrosoft } from 'react-icons/fa';
 import register from "./../images/reg.svg"
 import Log from "./../images/log.svg"
 import { auth } from '../../Firebase/Fire.config';
-import {createUserWithEmailAndPassword,signInWithEmailAndPassword,GoogleAuthProvider,signInWithPopup} from "firebase/auth"
+import {createUserWithEmailAndPassword,signInWithEmailAndPassword,GoogleAuthProvider,signInWithPopup,OAuthProvider} from "firebase/auth"
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -60,6 +60,41 @@ const AuthForm = () => {
       console.error(error);
     }
   };
+
+  const microsoft = async (e) => {
+    const provider = new OAuthProvider('microsoft.com');
+    try {
+        const result = await signInWithPopup(auth, provider);
+        const isNewUser = result.additionalUserInfo?.isNewUser;
+        const user = result.user;
+
+        // Check if the user's email is verified
+        if (!user.emailVerified) {
+            // Send email verification
+            await sendEmailVerification(user);
+            toast.info('Verification email sent. Please verify your email address.');
+        }
+
+        if (isNewUser) {
+            toast.success('Thank you for signing up!');
+        } else {
+            toast.success('Welcome, you are logged in!');
+        }
+
+        // Set user information in cookie
+        Cookies.set('user', user.displayName, { expires: 365 }); // Cookie expires in 365 days
+        Cookies.set('logedin', 'True', { expires: 365 }); // Cookie expires in 365 days
+    } catch (error) {
+        console.error(error.message);
+        if (error.code === 'auth/email-already-in-use') {
+            toast.error('The email address is already in use by another account.');
+        } else {
+            toast.error('The email address is already in use by another account.');
+        }
+    }
+}
+
+
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -156,7 +191,7 @@ const AuthForm = () => {
               <a href="#" onClick={google} className="social-icon">
                 <FaGoogle size={29} />
               </a>
-              <a href="#"  className="social-icon">
+              <a href="#" onClick={microsoft}  className="social-icon">
                 <FaMicrosoft size={29} />
               </a>
             </div>
@@ -180,7 +215,7 @@ const AuthForm = () => {
               <a href="#" onClick={google}  className="social-icon">
                 <FaGoogle size={29} />
               </a>
-              <a href="#"  className="social-icon">
+              <a href="#" onClick={microsoft}  className="social-icon">
                 <FaMicrosoft size={29} />
               </a>
             </div>
