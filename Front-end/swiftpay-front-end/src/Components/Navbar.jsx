@@ -4,6 +4,10 @@ import Bull from "./../images/Bull.png"
 import ServicesPopup from './ServicesPopup';
 import ContactUsPopup from './Contactus';
 import { Link } from 'react-router-dom';
+import { useTransition, animated } from '@react-spring/web';
+import { styled } from '@stitches/react';
+import LandingPage from './landingpage';
+
 
 const CustomNavbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,6 +17,7 @@ const CustomNavbar = () => {
     const [isContactUsClicked, setIsContactUsClicked] = useState(false);
     const [isServicesUsPopupOpen, setIsServicesPopupOpen] = useState(false);
     const [isContactUsPopupOpen, setIsContactPopupOpen] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
 
     const openAboutUsPopup = () => {
         setIsAboutUsPopupOpen(true);
@@ -56,6 +61,7 @@ const CustomNavbar = () => {
     };
 
     return (
+        <>
         <nav className="bg-white shadow-lg">
             <div className="mx-auto px-4 py-2 max-w-7xl">
                 <div className="flex justify-between items-center">
@@ -98,14 +104,20 @@ const CustomNavbar = () => {
                     <a href="#" className={`block py-2 px-4 text-sm text-blue-500 hover:bg-gray-100 ${isServicesClicked ? 'border-b-2 border-blue-500' : ''}`} onClick={(e) => {handleMobileItemClick('services');openServicesPop()}} >Services</a>
                     <a href="#" className={`block py-2 px-4 text-sm text-blue-500 hover:bg-gray-100 ${isContactUsClicked ? 'border-b-2 border-blue-500' : ''}`} onClick={(e) => {handleMobileItemClick('contact');openContactPopup()}}>Contact Us</a>
                 </div>
+                <Link to="/signIn-signUp">
                 <div className="bg-gray-100 py-4 px-4 flex justify-center">
                     <button className="text-black bg-transparent border border-blue-500 hover:bg-blue-500 hover:text-white px-4 py-2 transition duration-300">Get Started</button>
                 </div>
+                </Link>
             </div>
             <AboutUsPopup isOpen={isAboutUsPopupOpen} onRequestClose={closeAboutUsPopup} />
             <ServicesPopup isOpen={isServicesUsPopupOpen} onRequestClose={closeServicesPopup}/>
             <ContactUsPopup isOpen={isContactUsPopupOpen} onRequestClose={closeContactPopup}/>
+          
         </nav>
+        <LandingPage/>
+       
+    </>
     );
 };
 
