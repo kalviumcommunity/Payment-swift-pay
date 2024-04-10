@@ -4,6 +4,8 @@ import AuthForm from './Components/Signin-Signup';
 import Layout from './Components/Layout';
 import { BrowserRouter,Routes,Route} from 'react-router-dom';
 import Main from './Components/Main';
+import '@fortawesome/fontawesome-free/css/all.css';
+
 
 
 
@@ -17,6 +19,7 @@ function App() {
       <Route path='/Main' element={<Main/>}/>
     </Routes>
     </BrowserRouter>
+  
     
   );
 }

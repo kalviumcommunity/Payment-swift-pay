@@ -52,16 +52,15 @@ const AuthForm = () => {
     } catch (error) {
       const errorCode = error.code;
       const errorMessage = error.message;
-      if (errorCode === 'auth/user-not-found') {
-        toast.error("User not found. Please check your email and try again.");
-      } else if (errorCode === 'auth/wrong-password') {
-        toast.error("Invalid password. Please try again.");
+      if (errorCode === 'auth/user-not-found' || errorCode === 'auth/wrong-password') {
+        toast.error("Invalid email or password. Please try again.");
       } else {
         toast.error(errorMessage);
       }
       console.error(error);
     }
   };
+  
 
   const microsoft = async (e) => {
     const provider = new OAuthProvider('microsoft.com');
