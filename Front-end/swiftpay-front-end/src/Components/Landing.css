@@ -36,5 +36,18 @@
       margin-top: 20px; /* Adjust the margin-top as needed */
     }
   }
-  
+  .image1{
+    margin-right:50vw;
+  }
+  .image2{
+    margin-top: 100vw;
+  }
+  .image{
+    display: flex;
+    justify-content: center;
+    justify-content: space-around;
+    margin-right: 50px;
+
+  }
+ 
   
