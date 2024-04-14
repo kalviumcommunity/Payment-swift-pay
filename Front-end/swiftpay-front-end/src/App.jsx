@@ -11,6 +11,8 @@ import Service from './Components/Service.jsx';
 import ContactUs from './Components/Contactus.jsx';
 import TermsAndConditions from './Components/Terms.jsx';
 import PrivacyPolicy from './Components/Privacy.jsx';
+import PhoneNumber from './Components/PhoneNumber.jsx';
+import ForgotPassword from './Components/ForgotPassword.jsx';
 
 
 
@@ -26,15 +28,14 @@ function App() {
       <Route path='/contact' element={<ContactUs/>}/>
       <Route path='/conditions' element={<TermsAndConditions/>}/>
       <Route path='/privacy' element={<PrivacyPolicy/>}></Route>
+      <Route path='/Forgot' element={<Layout><ForgotPassword/></Layout>}></Route>
       <Route path='*' element={<Error404/>} />
     </Routes>
     </BrowserRouter>
- 
-    
 
-  
-    
+
   );
+ 
 }
 
 export default App;

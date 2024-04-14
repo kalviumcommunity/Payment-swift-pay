@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { sendEmailVerification } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-scroll';
 
 
 
@@ -184,6 +185,12 @@ const Yahoo = async () => {
       console.error(error);
     }
   };
+
+  const forgotPasswordLink = (
+    <Link to='/Forgot' className="forgot-password-link underline">
+      Forgot Password <span>?</span>
+    </Link>
+  );
   
   // Function to send email verification
   const sendEmailVerification = async (user) => {
@@ -217,6 +224,7 @@ const Yahoo = async () => {
               <i className="fas fa-lock"></i>
               <input type="password" placeholder="Password" onChange={handlePasswordChange} value={passwordforsignup} />
             </div>
+            {forgotPasswordLink}
             <input type="submit" value="Login" className="btn solid" />
             <p className="social-text">Or Sign in with social platforms</p>
             <div className="social-media">

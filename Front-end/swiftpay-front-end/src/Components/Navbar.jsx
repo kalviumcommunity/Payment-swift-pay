@@ -5,7 +5,6 @@ import LandingPage from './landingpage';
 
 const CustomNavbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-
     return (
         <>
             <nav className="bg-white shadow-lg">
