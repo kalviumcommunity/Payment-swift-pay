@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import head from './../images/head.png';
+import head from './../images/head2.png';
 import Tilt from 'react-parallax-tilt';
 import { Link } from 'react-scroll';
 import './Landing.css'; // Import the CSS file with the animation styles
@@ -76,7 +76,7 @@ function LandingPage() {
           <p className="text-sm md:text-lg text-wrap" style={{ marginBottom: '8px' }}>
             Welcome, finance user! How can I assist you today with your finance-related inquiries<br/>
             Whether you need help with financial analysis, investment advice, budgeting.<br/>
-            else finance-related, feel free to ask, and I'll do my best to provide you with the information or guidance you need
+            else finance-related, feel free to ask.
           </p>
         </div>
         <div style={{ height: '80px' }}></div> {/* Space between content and image */}
@@ -127,7 +127,7 @@ function LandingPage() {
           <p className="text-sm md:text-lg text-wrap mb-4 md:ml-0">
             A financial hub offers easy access to diverse financial services for all, fostering financial inclusivity and knowledge-sharing
           </p>
-          <a href="https://6617e7409e681013ad8c9782--wonderful-vacherin-a19ecf.netlify.app/" target='_blank' className="text-blue-500 underline block mb-4">Learn more</a>
+          <a href="https://661ab35f2a2032b43aa4b952--snazzy-caramel-9f6f58.netlify.app/" target='_blank' className="text-blue-500 underline block mb-4">Learn more</a>
         </div>
         <div className="mt-4 md:mt-0 max-w-md md:max-w-none">
           <img className="women" src={Women1} alt="Women" style={{ width: '100%', maxWidth: '400px', height: 'auto' }} />
@@ -153,7 +153,7 @@ function LandingPage() {
           <p className="text-sm md:text-lg text-wrap mb-4 md:ml-0">
             Seeking financial advice is crucial for securing your future. Forums like Financial Help offer valuable insights and support from experts and peers. 
           </p>
-          <a href="https://6617de5ba1646806ba014b64--marvelous-bunny-46e6f6.netlify.app/" target='_blank' className="text-blue-500 underline block mb-4">Learn more</a>
+          <a href=" https://timely-puppy-6c3eed.netlify.app/" target='_blank' className="text-blue-500 underline block mb-4">Learn more</a>
         </div>
         <div className="mt-4 md:mt-0 max-w-md md:max-w-none">
           <img className="women" src={men} alt="Women" style={{ width: '100%', maxWidth: '400px', height: 'auto' }} />
