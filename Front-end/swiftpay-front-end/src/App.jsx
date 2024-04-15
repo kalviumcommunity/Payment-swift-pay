@@ -12,9 +12,8 @@ import ContactUs from './Components/Contactus.jsx';
 import TermsAndConditions from './Components/Terms.jsx';
 import PrivacyPolicy from './Components/Privacy.jsx';
 import ForgotPassword from './Components/ForgotPassword.jsx';
-import OfflinePage from './Components/Offineline.jsx';
 import Feedback from './Components/feedback.jsx';
-import VerifyPhoneNumber from './Components/PhoneNumber.jsx';
+
 
 
 
@@ -37,11 +36,6 @@ function App() {
       <Route path='*' element={<Error404/>} />
     </Routes>
     </BrowserRouter>
-    
-    
-  
-  
-
 
   );
  
