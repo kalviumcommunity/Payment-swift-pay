@@ -42,7 +42,7 @@ const Error404 = () => {
           <p className="text-4xl">404, page not found.</p>
         </div>
       </div>
-      <Link to='/'><button className="mt-8 px-4 py-2 bg-blue-500 text-white rounded-full">Back</button></Link>
+     
     </div>
   );
 };

@@ -15,10 +15,6 @@ import ForgotPassword from './Components/ForgotPassword.jsx';
 import Feedback from './Components/feedback.jsx';
 
 
-
-
-
-
 function App() {
   return (
     <BrowserRouter>
