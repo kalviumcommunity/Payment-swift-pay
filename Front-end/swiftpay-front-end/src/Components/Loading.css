@@ -9,6 +9,7 @@
     background:white;
     z-index: 9999;
 }
+
 .loading-container {
     position: fixed;
     top: 0;
@@ -18,17 +19,19 @@
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-  
-  .loading-image {
+}
+
+.loading-image {
     position: absolute;
     top: 20vw; /* Adjust the top position as needed */
     left: 50%;
     transform: translateX(-50%);
-  }
-  .loading {
+}
+
+.loading {
     position: relative;
-  }
+}
+
 .loading-text {
     position: absolute;
     top: 0;
@@ -85,5 +88,17 @@
         filter: blur(4px);
     }
 }
+
+/* Media queries for tablet and mobile views */
+@media only screen and (max-width: 320px) {
+    .loading-text {
+        top: 40%;
+        transform: translate(10px, -20px);
+    }
+    .loading-image{
+        margin-top: 70%;
+    }
+}
+
 
 
