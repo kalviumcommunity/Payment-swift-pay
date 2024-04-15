@@ -42,7 +42,10 @@
       margin-top: 20px; /* Adjust as needed */
       padding: 20px; /* Adjust as needed */
     }
+    
   }
+ 
+
   
   .image1{
     margin-right:50vw;
@@ -56,6 +59,20 @@
     justify-content: space-around;
     margin-right: 50px;
 
+  }
+
+  @media (max-width: px) {
+    /* Hide the head image */
+    .head-image {
+      display: none;
+    }
+  
+    /* Add margin and padding to the parent container */
+    .head-container {
+      margin-top: 20px; /* Adjust as needed */
+      padding: 20px; /* Adjust as needed */
+    }
+    
   }
  
   

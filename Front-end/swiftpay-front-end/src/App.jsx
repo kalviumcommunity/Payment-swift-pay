@@ -12,7 +12,10 @@ import ContactUs from './Components/Contactus.jsx';
 import TermsAndConditions from './Components/Terms.jsx';
 import PrivacyPolicy from './Components/Privacy.jsx';
 import ForgotPassword from './Components/ForgotPassword.jsx';
-import Loading from './Components/Loading.jsx';
+import OfflinePage from './Components/Offineline.jsx';
+import Feedback from './Components/feedback.jsx';
+import VerifyPhoneNumber from './Components/PhoneNumber.jsx';
+
 
 
 
@@ -30,10 +33,13 @@ function App() {
       <Route path='/conditions' element={<TermsAndConditions/>}/>
       <Route path='/privacy' element={<PrivacyPolicy/>}></Route>
       <Route path='/Forgot' element={<Layout><ForgotPassword/></Layout>}></Route>
+      <Route path='/Feedback' element={<Layout><Feedback/></Layout>}/>
       <Route path='*' element={<Error404/>} />
     </Routes>
     </BrowserRouter>
-    // <Loading/>
+    
+    
+  
   
 
 

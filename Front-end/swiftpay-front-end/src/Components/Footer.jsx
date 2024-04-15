@@ -19,11 +19,11 @@ const Footer = () => {
               <div className="w-full md:w-2/3 mb-6 md:mb-0">
                 <h2 className="text-md font-bold mb-4 md:mb-0 text-center md:text-left">Quick Links</h2>
                 <ul className="text-sm mt-2 text-center md:text-left">
-                  <li className="mb-2"><a href="#" className="hover:text-gray-400 transition duration-300">Feedback</a></li>
+                  <li className="mb-2"><Link to="/Feedback" className="hover:text-gray-400 transition duration-300">Feedback</Link></li>
                   <li className="mb-2"><Link to="/conditions" className="hover:text-gray-400 transition duration-300">Terms & conditions</Link></li>
                   <li className="mb-1"><Link to="/privacy" className="hover:text-gray-400 transition duration-300">Privacy Policy</Link></li>
                 </ul>
-              </div>
+              </div>  
               <div className="w-full md:w-1/3">
                 <h2 className="text-md font-bold mb-4 md:mb-0 text-center">Follow Us</h2>
                 <div className="flex justify-center">
