@@ -113,7 +113,7 @@ function LandingPage() {
 
       {/* Image section */}
       <div className="md:mx-auto flex flex-col items-center md:flex-row md:justify-center md:flex-wrap md:gap-8 ml-4 md:ml-10">
-        <div className="text-center max-w-xs mb-8 md:mb-0 mr-0 md:mr-3 mt-4 md:mt-0">
+        <div className="text-center max-w-xs  md:mb-0 mr-0 md:mr-3 mt-4 md:mt-0">
           <img className="mx-auto max-w-full mt-28 md:mt-0" src={people} alt="People" /> {/* Added mt-4 for mobile view */}
           <h1 className="font-bold mt-5 text-xl md:text-xl">One Stop <span className="text-blue-500 font-bold">For</span> Finance</h1>
           <p className="mt-2 text-sm md:text-base">Discover the ultimate finance hub.<br />
