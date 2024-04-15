@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { sendEmailVerification } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-scroll';
+import { Link } from 'react-router-dom';
 
 
 
@@ -187,7 +187,7 @@ const Yahoo = async () => {
   };
 
   const forgotPasswordLink = (
-    <Link to='/Forgot' className="forgot-password-link underline">
+    <Link to='/Forgot' className="forgot-password-link underline ml-56">
       Forgot Password <span>?</span>
     </Link>
   );
