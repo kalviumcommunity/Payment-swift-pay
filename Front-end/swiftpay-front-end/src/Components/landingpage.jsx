@@ -113,21 +113,21 @@ function LandingPage() {
 
       {/* Image section */}
       <div className="md:mx-auto flex flex-col items-center md:flex-row md:justify-center md:flex-wrap md:gap-8 ml-4 md:ml-10">
-        <div className="text-center max-w-xs mb-8 md:mb-0 mr-0 md:mr-3 mt-4 md:mt-0">
-          <img className="mx-auto max-w-full mt-28 md:mt-0" src={people} alt="People" /> {/* Added mt-4 for mobile view */}
+        <div className="text-center max-w-xs  md:mb-0 mr-0 md:mr-3 mt-4 md:mt-0 transform hover:scale-105 transition-transform duration-500">
+          <img className="mx-auto max-w-full mt-28 md:mt-0 " src={people} alt="People" /> {/* Added mt-4 for mobile view */}
           <h1 className="font-bold mt-5 text-xl md:text-xl">One Stop <span className="text-blue-500 font-bold">For</span> Finance</h1>
           <p className="mt-2 text-sm md:text-base">Discover the ultimate finance hub.<br />
             Your one-stop solution for Finance<br />
             Unlock financial freedom today</p>
         </div>
-        <div className="text-center max-w-xs mb-8 md:mb-0 mr-0 md:mr-3 mt-4 md:mt-0">
+        <div className="text-center max-w-xs mb-8 md:mb-0 mr-0 md:mr-3 mt-4 md:mt-0 transform hover:scale-105 transition-transform duration-300">
           <img className="mx-auto max-w-full" src={File} alt="File" />
           <h1 className="font-bold mt-5 text-xl md:text-xl">All Managed <span className="text-blue-500 font-bold">in</span> one place</h1>
           <p className="mt-1 text-sm md:text-base">Access all financial tools in one hub.<br />
             Streamline your finances effortlessly.<br />
             Experience convenience like never before</p>
         </div>
-        <div className="text-center max-w-xs mt-4 md:mt-0">
+        <div className="text-center max-w-xs mt-4 md:mt-0 transform hover:scale-105 transition-transform duration-300">
           <img className="mx-auto max-w-full" src={Building} alt="Building" />
           <h1 className="font-bold mt-5 text-xl md:text-xl">Business <span className="text-blue-500 font-bold">Grow</span> Faster</h1>
           <p className="mt-1 text-sm md:text-base">Empower your business with our suite.<br />
