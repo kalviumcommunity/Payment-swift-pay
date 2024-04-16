@@ -1,3 +1,8 @@
-.modal-overlay {
-    backdrop-filter: blur(8px); /* Adjust the blur intensity as needed */
+
+.service-item {
+    transition: transform 0.3s ease-in-out;
+}
+
+.service-item:hover {
+    transform: scale(1.05);
 }

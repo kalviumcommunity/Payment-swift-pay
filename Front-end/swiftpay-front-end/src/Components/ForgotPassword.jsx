@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { auth } from '../../Firebase/Fire.config';
 import { toast } from 'react-toastify';
 import { sendPasswordResetEmail } from 'firebase/auth';
-import backgroundImage from '../images/Pass.png'; // Import your background image
 import { useNavigate } from 'react-router-dom';
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
