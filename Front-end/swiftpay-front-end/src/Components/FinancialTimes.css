@@ -1,0 +1,103 @@
+.financial-times {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .images img {
+    width: 100px; /* Adjust the width of images as needed */
+    height: auto;
+  }
+  
+  .categories {
+    display: flex;
+  }
+  
+  .category {
+    flex: 1;
+    text-align: center;
+  }
+  .financial-times h1 {
+    font-size:40px; 
+    font-weight: 400;
+    text-transform: uppercase; 
+   
+  } 
+ 
+  
+  
+
+  
+  .vertical-line {
+    width: 1px;
+    height: 20px;
+    background-color: black;
+    margin: 0 5px;
+  }
+  
+  .subscribe {
+    margin-left: auto;
+    cursor: pointer;
+  }
+  
+  .categories {
+    display: flex;
+  }
+  
+  .category {
+    flex: 1;
+    text-align: center;
+  }
+  /* Styles for the hamburger menu */
+.hamburger-menu {
+    display: none; /* Hide by default */
+    cursor: pointer;
+  }
+  
+  /* Styles for the navigation items container */
+  .nav-items-container {
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Hide the navigation items on smaller screens by default */
+  .nav-items-container.hide {
+    display: none;
+  }
+  
+  /* Show the navigation items on smaller screens when the hamburger menu is clicked */
+  .nav-items-container.show {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 60px; /* Adjust the top position as needed */
+    left: 0;
+    background-color: #ffffff;
+    padding: 10px;
+    border: 1px solid #dddddd;
+  }
+  
+ 
+  .subscribe {
+    cursor: pointer;
+  }
+  
+  .categories {
+    display: flex;
+  }
+  
+  .category {
+    flex: 1;
+    text-align: center;
+  }
+  .horizontal-line-gray {
+    border: none;
+    border-top: 1px solid #ccc; /* Grey color */
+    width: calc(100% - 32px); /* Cover the width of the container minus padding */
+    margin: 0 auto; /* Center the horizontal line */
+    margin-top: 20px; /* Add margin top for spacing */
+    margin-bottom: 20px; /* Add margin bottom for spacing */
+  }
+  
+  
+  
