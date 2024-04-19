@@ -26,6 +26,7 @@ import Job from './Components/Job.jsx';
 
 
 
+
 function App() {
   return (
     <BrowserRouter>
@@ -49,6 +50,7 @@ function App() {
       <Route path='/Job' element={<Job/>}/>
     </Routes>
     </BrowserRouter>
+   
  
     
   
