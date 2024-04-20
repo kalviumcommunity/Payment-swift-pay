@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThumbsUp, faThumbsDown, faComment } from '@fortawesome/free-solid-svg-icons';
-import { db } from '../../Firebase/Fire.config';
+import { db,auth } from '../../Firebase/Fire.config';
+import { onAuthStateChanged } from 'firebase/auth';
+import {toast} from "react-toastify"
 import {
   doc,
   getDoc,
@@ -25,14 +27,26 @@ const Business = () => {
   const [editCommentText, setEditCommentText] = useState('');
   const [commentsVisible, setCommentsVisible] = useState({}); // State to control the visibility of comments for each article
   const [commentCounts, setCommentCounts] = useState({});
+  const [currentUser, setCurrentUser] = useState(null);
+  const [dislikeCounts, setDislikeCounts] = useState([]);
+  
 
   // State for comment reactions (like and dislike counts for each comment)
   const [commentReactions, setCommentReactions] = useState({});
 
+
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    return unsubscribe;
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const apiKey = 'b2046fe9ee87859fe88282fc4c26b521';
+        const apiKey = '9bb61b9359ede6f072b17ca5316d282a';
         const apiUrl = `https://gnews.io/api/v4/search?q=Business&lang=en&sortby=publishedAt&apikey=${apiKey}`;
         const response = await axios.get(apiUrl);
         console.log('Fetched data:', response.data);
@@ -86,72 +100,234 @@ const Business = () => {
     fetchData();
   }, []);
 
-  const handleLike = async (index) => {
+ const handleLike = async (index) => {
     try {
-      const articleRef = doc(db, 'likes', index.toString());
-      const docSnap = await getDoc(articleRef);
-      const newCount = (docSnap.exists() ? docSnap.data().count : 0) + 1;
-      await setDoc(articleRef, { count: newCount }, { merge: true });
+        if (!currentUser) {
+            console.log('User not authenticated');
+            return;
+        }
 
-      setLikeCounts((prevCounts) => {
-        const newCounts = [...prevCounts];
-        newCounts[index] = newCount;
-        return newCounts;
-      });
+        // Get user's email or username
+        const userIdentifier = currentUser.email || currentUser.username;
+        if (!userIdentifier) {
+            console.log('User does not have an email or username');
+            return;
+        }
+
+        // Use email or username instead of UID
+        const userLikeRef = doc(db, 'articleLikes', `${index}-${userIdentifier}`);
+        const userLikeSnap = await getDoc(userLikeRef);
+
+        const articleRef = doc(db, 'likes', index.toString());
+        const docSnap = await getDoc(articleRef);
+
+        if (userLikeSnap.exists()) {
+            // User has already liked this article, so remove their like
+            const newCount = (docSnap.exists() ? docSnap.data().count : 0) - 1;
+
+            // Update like count in Firestore
+            await setDoc(articleRef, { count: newCount }, { merge: true });
+
+            // Remove the user's like record
+            await deleteDoc(userLikeRef);
+
+            // Update the local state for like counts
+            setLikeCounts((prevCounts) => {
+                const newCounts = [...prevCounts];
+                newCounts[index] = newCount;
+                return newCounts;
+            });
+
+            console.log('User has unliked the article');
+        } else {
+            // User has not liked this article yet, so add their like
+            const newCount = (docSnap.exists() ? docSnap.data().count : 0) + 1;
+
+            // Update like count in Firestore
+            await setDoc(articleRef, { count: newCount }, { merge: true });
+
+            // Mark user as having liked the article
+            await setDoc(userLikeRef, { liked: true });
+
+            // Update the local state for like counts
+            setLikeCounts((prevCounts) => {
+                const newCounts = [...prevCounts];
+                newCounts[index] = newCount;
+                return newCounts;
+            });
+
+            console.log('User has liked the article');
+        }
     } catch (error) {
-      console.error('Error updating like count:', error);
+        console.error('Error updating like count:', error);
     }
-  };
+};
 
-  const handleDislike = async (index) => {
-    // Implement handling dislikes as needed.
-  };
+
+
+const handleDislike = async (index) => {
+  try {
+      if (!currentUser) {
+          console.log('User not authenticated');
+          return;
+      }
+
+      const userDislikeRef = doc(db, 'articleDislikes', `${index}-${currentUser.uid}`);
+      const userDislikeSnap = await getDoc(userDislikeRef);
+
+      if (userDislikeSnap.exists()) {
+          // User has already disliked this article
+          await deleteDoc(userDislikeRef);
+
+          const articleRef = doc(db, 'dislikes', index.toString());
+          const docSnap = await getDoc(articleRef);
+          const newCount = (docSnap.exists() ? docSnap.data().count || 0 : 0) - 1;
+
+          await setDoc(articleRef, { count: newCount }, { merge: true });
+
+          setDislikeCounts((prevCounts) => {
+              const newCounts = [...prevCounts];
+              newCounts[index] = newCount;
+              return newCounts;
+          });
+      } else {
+          const articleRef = doc(db, 'dislikes', index.toString());
+          const docSnap = await getDoc(articleRef);
+          const newCount = (docSnap.exists() ? docSnap.data().count || 0 : 0) + 1;
+
+          await setDoc(articleRef, { count: newCount }, { merge: true });
+
+          await setDoc(userDislikeRef, { disliked: true });
+
+          setDislikeCounts((prevCounts) => {
+              const newCounts = [...prevCounts];
+              newCounts[index] = newCount;
+              return newCounts;
+          });
+      }
+  } catch (error) {
+      console.error('Error updating dislike count:', error);
+  }
+};
+
 
   const handleCommentSubmit = async (index) => {
     try {
-      const articleCommentsRef = collection(db, 'comments', index.toString(), 'comments');
-      await addDoc(articleCommentsRef, {
-        text: inputText[index],
-        timestamp: new Date(),
-        likeCount: 0,
-        dislikeCount: 0
-      });
+        const articleCommentsRef = collection(db, 'comments', index.toString(), 'comments');
+        const newCommentData = {
+            text: inputText[index],
+            timestamp: new Date(),
+            likeCount: 0,
+            dislikeCount: 0,
+            user: currentUser?.displayName || currentUser?.email,
+        };
+        console.log('Current User:', currentUser);
+        await addDoc(articleCommentsRef, newCommentData);
 
-      // Reset the new comment input for this article
-      setInputText((prevInputText) => ({
-        ...prevInputText,
-        [index]: '',
-      }));
+        setInputText((prevText) => ({
+            ...prevText,
+            [index]: '',
+        }));
     } catch (error) {
-      console.error('Error adding comment:', error);
+        console.error('Error adding comment:', error);
     }
-  };
+};
 
-  const handleCommentEdit = (index, commentId, text) => {
-    setEditCommentId(commentId);
-    setEditCommentText(text);
-  };
+const handleCommentEdit = async (index, commentId) => {
+  try {
+      // Retrieve the comment document from Firestore
+      const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
+      const commentSnap = await getDoc(commentRef);
+
+      if (commentSnap.exists()) {
+          const commentData = commentSnap.data();
+          
+          // Retrieve the current user's email and display name
+          const currentUserEmail = currentUser?.email;
+          const currentUserName = currentUser?.displayName;
+
+          // Check if the current user's email or display name matches the comment's user information
+          if (currentUserEmail === commentData.user || currentUserName === commentData.user) {
+              // Allow the user to edit the comment
+              setEditCommentId(commentId);
+              setEditCommentText(commentData.text);
+          } else {
+              toast.warning('This is not posted by you');
+          }
+      } else {
+          console.log('Comment does not exist');
+      }
+  } catch (error) {
+      console.error('Error editing comment:', error);
+  }
+};
+
 
   const handleCommentUpdate = async (index, commentId) => {
     try {
-      const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
-      await updateDoc(commentRef, { text: editCommentText });
-      // Reset the edit state
-      setEditCommentId(null);
-      setEditCommentText('');
+        // Get the reference to the comment in Firestore
+        const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
+        
+        // Fetch the comment data
+        const commentSnap = await getDoc(commentRef);
+        
+        if (commentSnap.exists()) {
+            // Get the data of the comment
+            const commentData = commentSnap.data();
+            
+            // Check if the current user is the owner of the comment
+            const currentUserEmail = currentUser?.email;
+            const currentUserName = currentUser?.displayName;
+            
+            if (currentUserEmail === commentData.user || currentUserName === commentData.user) {
+                // User is authorized to update the comment
+                await updateDoc(commentRef, { text: editCommentText });
+                
+                // Reset the edit state
+                setEditCommentId(null);
+                setEditCommentText('');
+            } else {
+                console.log('User is not authorized to edit this comment');
+            }
+        } else {
+            console.log('Comment does not exist');
+        }
     } catch (error) {
-      console.error('Error updating comment:', error);
+        console.error('Error updating comment:', error);
     }
-  };
+};
+
 
   const handleCommentDelete = async (index, commentId) => {
     try {
-      const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
-      await deleteDoc(commentRef);
+        // Get the reference to the comment in Firestore
+        const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
+        
+        // Fetch the comment data
+        const commentSnap = await getDoc(commentRef);
+        
+        if (commentSnap.exists()) {
+            // Get the data of the comment
+            const commentData = commentSnap.data();
+            
+            // Check if the current user is the owner of the comment
+            const currentUserEmail = currentUser?.email;
+            const currentUserName = currentUser?.displayName;
+            
+            if (currentUserEmail === commentData.user || currentUserName === commentData.user) {
+                // User is authorized to delete the comment
+                await deleteDoc(commentRef);
+            } else {
+                toast.warning('This comment is not posted by you');
+            }
+        } else {
+            console.log('Comment does not exist');
+        }
     } catch (error) {
-      console.error('Error deleting comment:', error);
+        console.error('Error deleting comment:', error);
     }
-  };
+};
+
 
   const goToArticle = (url) => {
     window.open(url, '_blank');
@@ -160,46 +336,102 @@ const Business = () => {
   // Handle liking a comment
   const handleCommentLike = async (index, commentId) => {
     try {
-      const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
-      const commentSnap = await getDoc(commentRef);
-      const newLikeCount = (commentSnap.exists() ? commentSnap.data().likeCount || 0 : 0) + 1;
+        const userLikeRef = doc(db, 'commentLikes', `${index}-${commentId}-${currentUser.uid}`);
+        const userLikeSnap = await getDoc(userLikeRef);
 
-      await updateDoc(commentRef, { likeCount: newLikeCount });
+        if (userLikeSnap.exists()) {
+            // User has already liked this comment
+            await deleteDoc(userLikeRef);
 
-      setCommentReactions((prevReactions) => {
-        const newReactions = { ...prevReactions };
-        newReactions[`${index}-${commentId}`] = {
-          likeCount: newLikeCount,
-          dislikeCount: prevReactions[`${index}-${commentId}`]?.dislikeCount || 0,
-        };
-        return newReactions;
-      });
+            const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
+            const commentSnap = await getDoc(commentRef);
+            const newLikeCount = (commentSnap.exists() ? commentSnap.data().likeCount : 0) - 1;
+
+            await updateDoc(commentRef, { likeCount: newLikeCount });
+
+            setCommentReactions((prevReactions) => {
+                const newReactions = { ...prevReactions };
+                newReactions[`${index}-${commentId}`] = {
+                    likeCount: newLikeCount,
+                    dislikeCount: prevReactions[`${index}-${commentId}`]?.dislikeCount || 0,
+                };
+                return newReactions;
+            });
+        } else {
+            // User has not liked this comment
+            const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
+            const commentSnap = await getDoc(commentRef);
+            const newLikeCount = (commentSnap.exists() ? commentSnap.data().likeCount : 0) + 1;
+
+            await updateDoc(commentRef, { likeCount: newLikeCount });
+
+            await setDoc(userLikeRef, { liked: true });
+
+            setCommentReactions((prevReactions) => {
+                const newReactions = { ...prevReactions };
+                newReactions[`${index}-${commentId}`] = {
+                    likeCount: newLikeCount,
+                    dislikeCount: prevReactions[`${index}-${commentId}`]?.dislikeCount || 0,
+                };
+                return newReactions;
+            });
+        }
     } catch (error) {
-      console.error('Error liking comment:', error);
+        console.error('Error updating comment like count:', error);
     }
-  };
+};
+
+
+
 
   // Handle disliking a comment
   const handleCommentDislike = async (index, commentId) => {
     try {
-      const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
-      const commentSnap = await getDoc(commentRef);
-      const newDislikeCount = (commentSnap.exists() ? commentSnap.data().dislikeCount || 0 : 0) + 1;
+        const userDislikeRef = doc(db, 'commentDislikes', `${index}-${commentId}-${currentUser.uid}`);
+        const userDislikeSnap = await getDoc(userDislikeRef);
 
-      await updateDoc(commentRef, { dislikeCount: newDislikeCount });
+        if (userDislikeSnap.exists()) {
+            // User has already disliked this comment
+            await deleteDoc(userDislikeRef);
 
-      setCommentReactions((prevReactions) => {
-        const newReactions = { ...prevReactions };
-        newReactions[`${index}-${commentId}`] = {
-          likeCount: prevReactions[`${index}-${commentId}`]?.likeCount || 0,
-          dislikeCount: newDislikeCount,
-        };
-        return newReactions;
-      });
+            const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
+            const commentSnap = await getDoc(commentRef);
+            const newDislikeCount = (commentSnap.exists() ? commentSnap.data().dislikeCount : 0) - 1;
+
+            await updateDoc(commentRef, { dislikeCount: newDislikeCount });
+
+            setCommentReactions((prevReactions) => {
+                const newReactions = { ...prevReactions };
+                newReactions[`${index}-${commentId}`] = {
+                    likeCount: prevReactions[`${index}-${commentId}`]?.likeCount || 0,
+                    dislikeCount: newDislikeCount,
+                };
+                return newReactions;
+            });
+        } else {
+            // User has not disliked this comment
+            const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
+            const commentSnap = await getDoc(commentRef);
+            const newDislikeCount = (commentSnap.exists() ? commentSnap.data().dislikeCount : 0) + 1;
+
+            await updateDoc(commentRef, { dislikeCount: newDislikeCount });
+
+            await setDoc(userDislikeRef, { disliked: true });
+
+            setCommentReactions((prevReactions) => {
+                const newReactions = { ...prevReactions };
+                newReactions[`${index}-${commentId}`] = {
+                    likeCount: prevReactions[`${index}-${commentId}`]?.likeCount || 0,
+                    dislikeCount: newDislikeCount,
+                };
+                return newReactions;
+            });
+        }
     } catch (error) {
-      console.error('Error disliking comment:', error);
+        console.error('Error updating comment dislike count:', error);
     }
-  };
+};
+
 
   const handleInputTextChange = (index, value) => {
     setInputText((prevText) => ({
@@ -251,6 +483,7 @@ const Business = () => {
                     >
                       <FontAwesomeIcon icon={faThumbsDown} />
                     </button>
+                    <span className='ml-2'> {dislikeCounts[index]} </span>
                     <button
                       onClick={() => toggleCommentsVisibility(index)}
                       className="ml-auto flex items-center p-2 rounded-full bg-gray-200 hover:bg-gray-300"
