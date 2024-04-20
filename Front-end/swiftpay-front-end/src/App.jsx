@@ -43,7 +43,7 @@ function App() {
       <Route path='/Feedback' element={<Layout><Feedback/></Layout>}/>
       <Route path='*' element={<Error404/>} />
       <Route path='/crypto' element={<Crypto></Crypto>} />
-      <Route path='/Business' element={<Business/>}/>
+      <Route path='/Business' element={<Layout><Business/></Layout>}/>
       <Route path='/Finance' element={<Finance/>}/>
       <Route path='/Wealth'element={<Wealth/>}/>
       <Route path='/Stock' element={<Stock/>}/>

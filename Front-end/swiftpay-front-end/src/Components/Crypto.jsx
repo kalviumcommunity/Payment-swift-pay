@@ -30,7 +30,7 @@ const Crypto = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const apiKey = 'b2046fe9ee87859fe88282fc4c26b521'; // Update with your API key
+        const apiKey = '9bb61b9359ede6f072b17ca5316d282a'; // Update with your API key
         const apiUrl = `https://gnews.io/api/v4/search?q=crypto&lang=en&sortby=&apikey=${apiKey}`;
         const response = await axios.get(apiUrl);
         setNewsData(response.data.articles);
