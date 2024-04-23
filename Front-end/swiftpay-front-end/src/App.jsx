@@ -16,13 +16,12 @@ import Feedback from './Components/feedback.jsx';
 import Chatbot from './Components/Chatbot.jsx';
 import NewsComponent from './Components/news.jsx';
 import FinancialTimes from './Components/news.jsx';
-
 import Crypto from './Components/Crypto.jsx';
 import Business from './Components/Bussiness.jsx';
 import Finance from './Components/Finance.jsx';
-import Wealth from './Components/Wealth.jsx';
 import Stock from './Components/Stock.jsx';
-import Job from './Components/Job.jsx';
+import Blog from './Components/Blog.jsx';
+import Chat from './Components/LF.jsx';
 
 
 
@@ -42,22 +41,14 @@ function App() {
       <Route path='/Forgot' element={<Layout><ForgotPassword/></Layout>}></Route>
       <Route path='/Feedback' element={<Layout><Feedback/></Layout>}/>
       <Route path='*' element={<Error404/>} />
-      <Route path='/crypto' element={<Crypto></Crypto>} />
+      <Route path='/crypto' element={<Layout><Crypto></Crypto></Layout>} />
       <Route path='/Business' element={<Layout><Business/></Layout>}/>
-      <Route path='/Finance' element={<Finance/>}/>
-      <Route path='/Wealth'element={<Wealth/>}/>
-      <Route path='/Stock' element={<Stock/>}/>
-      <Route path='/Job' element={<Job/>}/>
+      <Route path='/Finance' element={<Layout><Finance/></Layout>}/>
+      <Route path='/Stock' element={<Layout><Stock/></Layout>}/>
+      <Route path='/chat' element={<Chat/>}/>
     </Routes>
     </BrowserRouter>
-   
  
-    
-  
-   
-
-   
-
   );
  
 }
