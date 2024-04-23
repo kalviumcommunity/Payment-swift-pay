@@ -5,6 +5,9 @@ import { faThumbsUp, faThumbsDown, faComment } from '@fortawesome/free-solid-svg
 import { db,auth } from '../../Firebase/Fire.config';
 import { onAuthStateChanged } from 'firebase/auth';
 import {toast} from "react-toastify"
+import { debounce } from 'lodash';
+
+
 import {
   doc,
   getDoc,
@@ -15,6 +18,7 @@ import {
   onSnapshot,
   deleteDoc,
   updateDoc,
+  runTransaction, getFirestore
 } from 'firebase/firestore';
 import FinancialTimes from './news';
 
@@ -29,6 +33,7 @@ const Business = () => {
   const [commentCounts, setCommentCounts] = useState({});
   const [currentUser, setCurrentUser] = useState(null);
   const [dislikeCounts, setDislikeCounts] = useState([]);
+  
   
 
   // State for comment reactions (like and dislike counts for each comment)
@@ -46,7 +51,7 @@ const Business = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const apiKey = '9bb61b9359ede6f072b17ca5316d282a';
+        const apiKey = '55e97b2991a74a577a0ab4baa650903b';
         const apiUrl = `https://gnews.io/api/v4/search?q=Business&lang=en&sortby=publishedAt&apikey=${apiKey}`;
         const response = await axios.get(apiUrl);
         console.log('Fetched data:', response.data);
@@ -100,7 +105,7 @@ const Business = () => {
     fetchData();
   }, []);
 
- const handleLike = async (index) => {
+  const handleLike = debounce(async (index) => {
     try {
         if (!currentUser) {
             console.log('User not authenticated');
@@ -116,14 +121,15 @@ const Business = () => {
 
         // Use email or username instead of UID
         const userLikeRef = doc(db, 'articleLikes', `${index}-${userIdentifier}`);
-        const userLikeSnap = await getDoc(userLikeRef);
-
         const articleRef = doc(db, 'likes', index.toString());
+        const userLikeSnap = await getDoc(userLikeRef);
         const docSnap = await getDoc(articleRef);
+
+        let newCount;
 
         if (userLikeSnap.exists()) {
             // User has already liked this article, so remove their like
-            const newCount = (docSnap.exists() ? docSnap.data().count : 0) - 1;
+            newCount = (docSnap.exists() ? docSnap.data().count : 0) - 1;
 
             // Update like count in Firestore
             await setDoc(articleRef, { count: newCount }, { merge: true });
@@ -141,7 +147,7 @@ const Business = () => {
             console.log('User has unliked the article');
         } else {
             // User has not liked this article yet, so add their like
-            const newCount = (docSnap.exists() ? docSnap.data().count : 0) + 1;
+            newCount = (docSnap.exists() ? docSnap.data().count : 0) + 1;
 
             // Update like count in Firestore
             await setDoc(articleRef, { count: newCount }, { merge: true });
@@ -161,17 +167,17 @@ const Business = () => {
     } catch (error) {
         console.error('Error updating like count:', error);
     }
-};
+}, 300);
 
 
-
-const handleDislike = async (index) => {
+const handleDislike = debounce(async (index) => {
   try {
       if (!currentUser) {
           console.log('User not authenticated');
           return;
       }
 
+      // Define document references
       const userDislikeRef = doc(db, 'articleDislikes', `${index}-${currentUser.uid}`);
       const userDislikeSnap = await getDoc(userDislikeRef);
 
@@ -183,8 +189,10 @@ const handleDislike = async (index) => {
           const docSnap = await getDoc(articleRef);
           const newCount = (docSnap.exists() ? docSnap.data().count || 0 : 0) - 1;
 
+          // Update dislike count in Firestore
           await setDoc(articleRef, { count: newCount }, { merge: true });
 
+          // Update the local state for dislike counts
           setDislikeCounts((prevCounts) => {
               const newCounts = [...prevCounts];
               newCounts[index] = newCount;
@@ -195,10 +203,13 @@ const handleDislike = async (index) => {
           const docSnap = await getDoc(articleRef);
           const newCount = (docSnap.exists() ? docSnap.data().count || 0 : 0) + 1;
 
+          // Update dislike count in Firestore
           await setDoc(articleRef, { count: newCount }, { merge: true });
 
+          // Mark user as having disliked the article
           await setDoc(userDislikeRef, { disliked: true });
 
+          // Update the local state for dislike counts
           setDislikeCounts((prevCounts) => {
               const newCounts = [...prevCounts];
               newCounts[index] = newCount;
@@ -208,7 +219,9 @@ const handleDislike = async (index) => {
   } catch (error) {
       console.error('Error updating dislike count:', error);
   }
-};
+}, 300); // Debounce delay set to 300 milliseconds
+
+// Use the debounced handleDislike function
 
 
   const handleCommentSubmit = async (index) => {
@@ -334,103 +347,99 @@ const handleCommentEdit = async (index, commentId) => {
   };
 
   // Handle liking a comment
-  const handleCommentLike = async (index, commentId) => {
-    try {
-        const userLikeRef = doc(db, 'commentLikes', `${index}-${commentId}-${currentUser.uid}`);
-        const userLikeSnap = await getDoc(userLikeRef);
+  const debounceDelay = 300;
 
-        if (userLikeSnap.exists()) {
-            // User has already liked this comment
-            await deleteDoc(userLikeRef);
-
-            const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
-            const commentSnap = await getDoc(commentRef);
-            const newLikeCount = (commentSnap.exists() ? commentSnap.data().likeCount : 0) - 1;
-
-            await updateDoc(commentRef, { likeCount: newLikeCount });
-
-            setCommentReactions((prevReactions) => {
-                const newReactions = { ...prevReactions };
-                newReactions[`${index}-${commentId}`] = {
-                    likeCount: newLikeCount,
-                    dislikeCount: prevReactions[`${index}-${commentId}`]?.dislikeCount || 0,
-                };
-                return newReactions;
-            });
-        } else {
-            // User has not liked this comment
-            const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
-            const commentSnap = await getDoc(commentRef);
-            const newLikeCount = (commentSnap.exists() ? commentSnap.data().likeCount : 0) + 1;
-
-            await updateDoc(commentRef, { likeCount: newLikeCount });
-
-            await setDoc(userLikeRef, { liked: true });
-
-            setCommentReactions((prevReactions) => {
-                const newReactions = { ...prevReactions };
-                newReactions[`${index}-${commentId}`] = {
-                    likeCount: newLikeCount,
-                    dislikeCount: prevReactions[`${index}-${commentId}`]?.dislikeCount || 0,
-                };
-                return newReactions;
-            });
-        }
-    } catch (error) {
-        console.error('Error updating comment like count:', error);
-    }
-};
-
-
-
-
-  // Handle disliking a comment
-  const handleCommentDislike = async (index, commentId) => {
-    try {
-        const userDislikeRef = doc(db, 'commentDislikes', `${index}-${commentId}-${currentUser.uid}`);
-        const userDislikeSnap = await getDoc(userDislikeRef);
-
-        if (userDislikeSnap.exists()) {
-            // User has already disliked this comment
-            await deleteDoc(userDislikeRef);
-
-            const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
-            const commentSnap = await getDoc(commentRef);
-            const newDislikeCount = (commentSnap.exists() ? commentSnap.data().dislikeCount : 0) - 1;
-
-            await updateDoc(commentRef, { dislikeCount: newDislikeCount });
-
-            setCommentReactions((prevReactions) => {
-                const newReactions = { ...prevReactions };
-                newReactions[`${index}-${commentId}`] = {
-                    likeCount: prevReactions[`${index}-${commentId}`]?.likeCount || 0,
-                    dislikeCount: newDislikeCount,
-                };
-                return newReactions;
-            });
-        } else {
-            // User has not disliked this comment
-            const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
-            const commentSnap = await getDoc(commentRef);
-            const newDislikeCount = (commentSnap.exists() ? commentSnap.data().dislikeCount : 0) + 1;
-
-            await updateDoc(commentRef, { dislikeCount: newDislikeCount });
-
-            await setDoc(userDislikeRef, { disliked: true });
-
-            setCommentReactions((prevReactions) => {
-                const newReactions = { ...prevReactions };
-                newReactions[`${index}-${commentId}`] = {
-                    likeCount: prevReactions[`${index}-${commentId}`]?.likeCount || 0,
-                    dislikeCount: newDislikeCount,
-                };
-                return newReactions;
-            });
-        }
-    } catch (error) {
-        console.error('Error updating comment dislike count:', error);
-    }
-};
+  // Define the debounce functions for like and dislike
+  const handleCommentLike = debounce(async (index, commentId) => {
+      try {
+          // Create references to the user like and comment documents
+          const userLikeRef = doc(db, 'commentLikes', `${index}-${commentId}-${currentUser.uid}`);
+          const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
+  
+          // Run a Firestore transaction for atomic updates
+          await runTransaction(db, async (transaction) => {
+              // Check if the user has already liked the comment
+              const userLikeSnap = await transaction.get(userLikeRef);
+              const commentSnap = await transaction.get(commentRef);
+  
+              let newLikeCount;
+              if (userLikeSnap.exists()) {
+                  // User has already liked the comment, remove the like
+                  transaction.delete(userLikeRef);
+                  newLikeCount = (commentSnap.exists() ? commentSnap.data().likeCount : 0) - 1;
+              } else {
+                  // User has not liked the comment yet, add the like
+                  transaction.set(userLikeRef, { liked: true });
+                  newLikeCount = (commentSnap.exists() ? commentSnap.data().likeCount : 0) + 1;
+              }
+  
+              // Update the comment like count
+              transaction.update(commentRef, { likeCount: newLikeCount });
+  
+              // Update the state for comment reactions
+              setCommentReactions((prevReactions) => {
+                  const newReactions = { ...prevReactions };
+                  newReactions[`${index}-${commentId}`] = {
+                      likeCount: newLikeCount,
+                      dislikeCount: prevReactions[`${index}-${commentId}`]?.dislikeCount || 0,
+                  };
+                  return newReactions;
+              });
+          });
+  
+          console.log('Comment like handled successfully');
+      } catch (error) {
+          console.error('Error updating comment like count:', error);
+      }
+  }, debounceDelay);
+  
+  const handleCommentDislike = debounce(async (index, commentId) => {
+      try {
+          // Create references to the user dislike and comment documents
+          const userDislikeRef = doc(db, 'commentDislikes', `${index}-${commentId}-${currentUser.uid}`);
+          const commentRef = doc(db, 'comments', index.toString(), 'comments', commentId);
+  
+          // Run a Firestore transaction for atomic updates
+          await runTransaction(db, async (transaction) => {
+              // Check if the user has already disliked the comment
+              const userDislikeSnap = await transaction.get(userDislikeRef);
+              const commentSnap = await transaction.get(commentRef);
+  
+              let newDislikeCount;
+              if (userDislikeSnap.exists()) {
+                  // User has already disliked the comment, remove the dislike
+                  transaction.delete(userDislikeRef);
+                  newDislikeCount = (commentSnap.exists() ? commentSnap.data().dislikeCount : 0) - 1;
+              } else {
+                  // User has not disliked the comment yet, add the dislike
+                  transaction.set(userDislikeRef, { disliked: true });
+                  newDislikeCount = (commentSnap.exists() ? commentSnap.data().dislikeCount : 0) + 1;
+              }
+  
+              // Update the comment dislike count
+              transaction.update(commentRef, { dislikeCount: newDislikeCount });
+  
+              // Update the state for comment reactions
+              setCommentReactions((prevReactions) => {
+                  const newReactions = { ...prevReactions };
+                  newReactions[`${index}-${commentId}`] = {
+                      likeCount: prevReactions[`${index}-${commentId}`]?.likeCount || 0,
+                      dislikeCount: newDislikeCount,
+                  };
+                  return newReactions;
+              });
+          });
+  
+          console.log('Comment dislike handled successfully');
+      } catch (error) {
+          console.error('Error updating comment dislike count:', error);
+      }
+  }, debounceDelay);
+  
+  // Use the debounced functions when a user clicks the buttons
+  // Example usage:
+  // onClick={() => debouncedHandleCommentLike(index, commentId)}
+  // onClick={() => debouncedHandleCommentDislike(index, commentId)}
 
 
   const handleInputTextChange = (index, value) => {

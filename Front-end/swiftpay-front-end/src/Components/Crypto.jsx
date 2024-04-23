@@ -2,7 +2,12 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThumbsUp, faThumbsDown, faComment } from '@fortawesome/free-solid-svg-icons';
-import { db } from '../../Firebase/Fire.config';
+import { db,auth } from '../../Firebase/Fire.config';
+import { onAuthStateChanged } from 'firebase/auth';
+import {toast} from "react-toastify"
+import { debounce } from 'lodash';
+
+
 import {
   doc,
   getDoc,
@@ -13,26 +18,43 @@ import {
   onSnapshot,
   deleteDoc,
   updateDoc,
+  runTransaction, getFirestore
 } from 'firebase/firestore';
 import FinancialTimes from './news';
 
-
 const Crypto = () => {
   const [newsData, setNewsData] = useState([]);
-  const [likeCounts, setLikeCounts] = useState([]);
+  const [likeCounts, setLikeCount] = useState([]);
   const [comments, setComments] = useState({});
   const [inputText, setInputText] = useState({}); // State for comment input text for each article
   const [editCommentId, setEditCommentId] = useState(null);
   const [editCommentText, setEditCommentText] = useState('');
   const [commentsVisible, setCommentsVisible] = useState({}); // State to control the visibility of comments for each article
-  const [commentReactions, setCommentReactions] = useState({}); // State for comment reactions
+  const [commentCounts, setCommentCounts] = useState({});
+  const [currentUser, setCurrentUser] = useState(null);
+  const [dislikeCounts, setDislikeCounts] = useState([]);
+  
+  
+
+  // State for comment reactions (like and dislike counts for each comment)
+  const [commentReactions, setCommentReactions] = useState({});
+
+
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const apiKey = '9bb61b9359ede6f072b17ca5316d282a'; // Update with your API key
-        const apiUrl = `https://gnews.io/api/v4/search?q=crypto&lang=en&sortby=&apikey=${apiKey}`;
+        const apiKey = '55e97b2991a74a577a0ab4baa650903b';
+        const apiUrl = `https://gnews.io/api/v4/search?q=Crypto&lang=en&sortby=publishedAt&apikey=${apiKey}`;
         const response = await axios.get(apiUrl);
+        console.log('Fetched data:', response.data);
         setNewsData(response.data.articles);
 
         // Fetch like counts from Firestore for each article
@@ -43,7 +65,7 @@ const Crypto = () => {
             return docSnap.exists() ? docSnap.data().count || 0 : 0;
           })
         );
-        setLikeCounts(likeCountsArray);
+        setLikeCount(likeCountsArray);
 
         // Subscribe to comments for each article
         response.data.articles.forEach((article, index) => {
@@ -58,8 +80,9 @@ const Crypto = () => {
               ...prevComments,
               [index]: commentsData,
             }));
+           
 
-            // Fetch like and dislike counts for each comment
+            // Fetching like and dislike counts for each comment
             snapshot.forEach((doc) => {
               const commentData = doc.data();
               setCommentReactions((prevReactions) => {
@@ -75,140 +98,393 @@ const Crypto = () => {
           return unsubscribe;
         });
       } catch (error) {
-        console.error('Error fetching crypto news data:', error);
+        console.error('Error fetching news data:', error);
       }
     };
 
     fetchData();
   }, []);
 
-  // Handle liking an article
-  const handleLike = async (index) => {
+   // Delay in milliseconds for debouncing
+   const debounceDelays=300
+
+// Debounced function for handling likes
+const handleLike = debounce(async (index) => {
     try {
-      const articleRef = doc(db, 'cryptoLikes', index.toString());
-      const docSnap = await getDoc(articleRef);
-      const newCount = (docSnap.exists() ? docSnap.data().count || 0 : 0) + 1;
-      await setDoc(articleRef, { count: newCount }, { merge: true });
+        if (!currentUser) {
+            console.log('User not authenticated');
+            return;
+        }
 
-      setLikeCounts((prevCounts) => {
-        const newCounts = [...prevCounts];
-        newCounts[index] = newCount;
-        return newCounts;
-      });
+        // Get user's email or username
+        const userIdentifier = currentUser.email || currentUser.username;
+        if (!userIdentifier) {
+            console.log('User does not have an email or username');
+            return;
+        }
+
+        // Use email or username instead of UID
+        const userLikeRef = doc(db, 'articleLikes', `${index}-${userIdentifier}`);
+        const articleRef = doc(db, 'cryptoLikes', index.toString());
+
+        // Use a transaction for concurrency control
+        await runTransaction(db, async (transaction) => {
+            const userLikeSnap = await transaction.get(userLikeRef);
+            const articleSnap = await transaction.get(articleRef);
+
+            let newCount;
+
+            if (userLikeSnap.exists()) {
+                // User has already liked this article, so remove their like
+                newCount = (articleSnap.exists() ? articleSnap.data().count : 0) - 1;
+
+                // Ensure the new count does not fall below zero
+                newCount = Math.max(newCount, 0);
+
+                // Update like count in Firestore
+                transaction.update(articleRef, { count: newCount });
+
+                // Remove the user's like record
+                transaction.delete(userLikeRef);
+
+                // Update the local state for like counts
+                setLikeCount((prevCounts) => {
+                    const newCounts = [...prevCounts];
+                    newCounts[index] = newCount;
+                    return newCounts;
+                });
+
+                console.log('User has unliked the article');
+            } else {
+                // User has not liked this article yet, so add their like
+                newCount = (articleSnap.exists() ? articleSnap.data().count : 0) + 1;
+
+                // Update like count in Firestore
+                transaction.update(articleRef, { count: newCount });
+
+                // Mark user as having liked the article
+                transaction.set(userLikeRef, { liked: true });
+
+                // Update the local state for like counts
+                setLikeCount((prevCounts) => {
+                    const newCounts = [...prevCounts];
+                    newCounts[index] = newCount;
+                    return newCounts;
+                });
+
+                console.log('User has liked the article');
+            }
+        });
+
+        // Optional: Provide feedback to the user using a toast notification
+        // toast.success('Your like/unlike action was successful');
+
     } catch (error) {
-      console.error('Error updating like count:', error);
-    }
-  };
+        console.error('Error updating like count:', error);
 
-  // Handle disliking an article
-  const handleDislike = async (index) => {
+        // Optional: Provide feedback to the user using a toast notification
+        // toast.error('Failed to update like count');
+    }
+}, debounceDelays);
+ // Delay in milliseconds for debouncing
+
+
+
+
+// Define a debouncing delay in milliseconds
+const Delay = 300;
+
+// Define the debounced handleDislike function
+const handleDislike = debounce(async (index) => {
     try {
-      // Implement handling dislikes as needed
-    } catch (error) {
-      console.error('Error updating dislike count:', error);
-    }
-  };
+        if (!currentUser) {
+            console.log('User not authenticated');
+            return;
+        }
 
-  // Handle posting a comment
+        const userDislikeRef = doc(db, 'articleDislikes', `${index}-${currentUser.uid}`);
+        const userDislikeSnap = await getDoc(userDislikeRef);
+
+        const articleRef = doc(db, 'Cryptodislikes', index.toString());
+        const docSnap = await getDoc(articleRef);
+
+        if (userDislikeSnap.exists()) {
+            // User has already disliked this article, so remove their dislike
+            const currentCount = docSnap.exists() ? docSnap.data().count : 0;
+            const newCount = currentCount - 1;
+
+            // Ensure the new count is not negative
+            if (newCount < 0) {
+                console.log('Dislike count cannot be negative');
+                return;
+            }
+
+            // Update dislike count in Firestore
+            await setDoc(articleRef, { count: newCount }, { merge: true });
+
+            // Remove the user's dislike record
+            await deleteDoc(userDislikeRef);
+
+            // Update the local state for dislike counts
+            setDislikeCounts((prevCounts) => {
+                const newCounts = [...prevCounts];
+                newCounts[index] = newCount;
+                return newCounts;
+            });
+
+            console.log('User has removed dislike from the article');
+        } else {
+            // User has not disliked this article yet, so add their dislike
+            const newCount = (docSnap.exists() ? docSnap.data().count : 0) + 1;
+
+            // Update dislike count in Firestore
+            await setDoc(articleRef, { count: newCount }, { merge: true });
+
+            // Mark user as having disliked the article
+            await setDoc(userDislikeRef, { disliked: true });
+
+            // Update the local state for dislike counts
+            setDislikeCounts((prevCounts) => {
+                const newCounts = [...prevCounts];
+                newCounts[index] = newCount;
+                return newCounts;
+            });
+
+            console.log('User has disliked the article');
+        }
+    } catch (error) {
+        console.error('Error updating dislike count:', error);
+    }
+}, Delay);
+
+
   const handleCommentSubmit = async (index) => {
     try {
-      const articleCommentsRef = collection(db, 'cryptoComments', index.toString(), 'comments');
+        const articleCommentsRef = collection(db, 'cryptoComments', index.toString(), 'comments');
+        const newCommentData = {
+            text: inputText[index],
+            timestamp: new Date(),
+            likeCount: 0,
+            dislikeCount: 0,
+            user: currentUser?.displayName || currentUser?.email,
+        };
+        console.log('Current User:', currentUser);
+        await addDoc(articleCommentsRef, newCommentData);
 
-      // Create the comment data object with the current date and time
-      const commentData = {
-        text: inputText[index],
-        timestamp: new Date().toISOString(), // Include the current date and time as an ISO string
-        likeCount: 0,
-        dislikeCount: 0,
-      };
-
-      // Add the comment data to Firestore
-      await addDoc(articleCommentsRef, commentData);
-
-      // Reset the new comment input for this article
-      setInputText((prevInputText) => ({
-        ...prevInputText,
-        [index]: '',
-      }));
+        setInputText((prevText) => ({
+            ...prevText,
+            [index]: '',
+        }));
     } catch (error) {
-      console.error('Error adding comment:', error);
+        console.error('Error adding comment:', error);
     }
-  };
+};
 
-  // Handle editing a comment
-  const handleCommentEdit = (index, commentId, text) => {
-    setEditCommentId(commentId);
-    setEditCommentText(text);
-  };
+const handleCommentEdit = async (index, commentId) => {
+  try {
+      // Retrieve the comment document from Firestore
+      const commentRef = doc(db, 'cryptoComments', index.toString(), 'comments', commentId);
+      const commentSnap = await getDoc(commentRef);
 
-  // Handle updating a comment
+      if (commentSnap.exists()) {
+          const commentData = commentSnap.data();
+          
+          // Retrieve the current user's email and display name
+          const currentUserEmail = currentUser?.email;
+          const currentUserName = currentUser?.displayName;
+
+          // Check if the current user's email or display name matches the comment's user information
+          if (currentUserEmail === commentData.user || currentUserName === commentData.user) {
+              // Allow the user to edit the comment
+              setEditCommentId(commentId);
+              setEditCommentText(commentData.text);
+          } else {
+              toast.warning('This is not posted by you');
+          }
+      } else {
+          console.log('Comment does not exist');
+      }
+  } catch (error) {
+      console.error('Error editing comment:', error);
+  }
+};
+
+
   const handleCommentUpdate = async (index, commentId) => {
     try {
-      const commentRef = doc(db, 'cryptoComments', index.toString(), 'comments', commentId);
-      await updateDoc(commentRef, { text: editCommentText });
-      // Reset the edit state
-      setEditCommentId(null);
-      setEditCommentText('');
+        // Get the reference to the comment in Firestore
+        const commentRef = doc(db, 'cryptoComments', index.toString(), 'comments', commentId);
+        
+        // Fetch the comment data
+        const commentSnap = await getDoc(commentRef);
+        
+        if (commentSnap.exists()) {
+            // Get the data of the comment
+            const commentData = commentSnap.data();
+            
+            // Check if the current user is the owner of the comment
+            const currentUserEmail = currentUser?.email;
+            const currentUserName = currentUser?.displayName;
+            
+            if (currentUserEmail === commentData.user || currentUserName === commentData.user) {
+                // User is authorized to update the comment
+                await updateDoc(commentRef, { text: editCommentText });
+                
+                // Reset the edit state
+                setEditCommentId(null);
+                setEditCommentText('');
+            } else {
+                console.log('User is not authorized to edit this comment');
+            }
+        } else {
+            console.log('Comment does not exist');
+        }
     } catch (error) {
-      console.error('Error updating comment:', error);
+        console.error('Error updating comment:', error);
     }
-  };
+};
 
-  // Handle deleting a comment
+
   const handleCommentDelete = async (index, commentId) => {
     try {
-      const commentRef = doc(db, 'cryptoComments', index.toString(), 'comments', commentId);
-      await deleteDoc(commentRef);
+        // Get the reference to the comment in Firestore
+        const commentRef = doc(db, 'cryptoComments', index.toString(), 'comments', commentId);
+        
+        // Fetch the comment data
+        const commentSnap = await getDoc(commentRef);
+        
+        if (commentSnap.exists()) {
+            // Get the data of the comment
+            const commentData = commentSnap.data();
+            
+            // Check if the current user is the owner of the comment
+            const currentUserEmail = currentUser?.email;
+            const currentUserName = currentUser?.displayName;
+            
+            if (currentUserEmail === commentData.user || currentUserName === commentData.user) {
+                // User is authorized to delete the comment
+                await deleteDoc(commentRef);
+            } else {
+                toast.warning('This comment is not posted by you');
+            }
+        } else {
+            console.log('Comment does not exist');
+        }
     } catch (error) {
-      console.error('Error deleting comment:', error);
+        console.error('Error deleting comment:', error);
     }
+};
+
+
+  const goToArticle = (url) => {
+    window.open(url, '_blank');
   };
 
   // Handle liking a comment
-  const handleCommentLike = async (index, commentId) => {
-    try {
-      const commentRef = doc(db, 'cryptoComments', index.toString(), 'comments', commentId);
-      const commentSnap = await getDoc(commentRef);
-      const newLikeCount = (commentSnap.exists() ? commentSnap.data().likeCount || 0 : 0) + 1;
+  const debounceDelay = 300;
 
-      await updateDoc(commentRef, { likeCount: newLikeCount });
+  // Debounced function for handling comment likes
+  const handleCommentLike = debounce(async (index, commentId) => {
+      try {
+          // Your existing code for handling likes
+          const userLikeRef = doc(db, 'CryptocommentLikes', `${index}-${commentId}-${currentUser.uid}`);
+          const userLikeSnap = await getDoc(userLikeRef);
+  
+          if (userLikeSnap.exists()) {
+              // User has already liked this comment
+              await deleteDoc(userLikeRef);
+  
+              const commentRef = doc(db, 'cryptoComments', index.toString(), 'comments', commentId);
+              const commentSnap = await getDoc(commentRef);
+              const newLikeCount = (commentSnap.exists() ? commentSnap.data().likeCount : 0) - 1;
+  
+              await updateDoc(commentRef, { likeCount: newLikeCount });
+  
+              setCommentReactions((prevReactions) => {
+                  const newReactions = { ...prevReactions };
+                  newReactions[`${index}-${commentId}`] = {
+                      likeCount: newLikeCount,
+                      dislikeCount: prevReactions[`${index}-${commentId}`]?.dislikeCount || 0,
+                  };
+                  return newReactions;
+              });
+          } else {
+              // User has not liked this comment
+              const commentRef = doc(db, 'cryptoComments', index.toString(), 'comments', commentId);
+              const commentSnap = await getDoc(commentRef);
+              const newLikeCount = (commentSnap.exists() ? commentSnap.data().likeCount : 0) + 1;
+  
+              await updateDoc(commentRef, { likeCount: newLikeCount });
+  
+              await setDoc(userLikeRef, { liked: true });
+  
+              setCommentReactions((prevReactions) => {
+                  const newReactions = { ...prevReactions };
+                  newReactions[`${index}-${commentId}`] = {
+                      likeCount: newLikeCount,
+                      dislikeCount: prevReactions[`${index}-${commentId}`]?.dislikeCount || 0,
+                  };
+                  return newReactions;
+              });
+          }
+      } catch (error) {
+          console.error('Error updating comment like count:', error);
+      }
+  }, debounceDelay);
+  
+  // Debounced function for handling comment dislikes
+  const handleCommentDislike = debounce(async (index, commentId) => {
+      try {
+          // Your existing code for handling dislikes
+          const userDislikeRef = doc(db, 'CryptocommentDislikes', `${index}-${commentId}-${currentUser.uid}`);
+          const userDislikeSnap = await getDoc(userDislikeRef);
+  
+          if (userDislikeSnap.exists()) {
+              // User has already disliked this comment
+              await deleteDoc(userDislikeRef);
+  
+              const commentRef = doc(db, 'cryptoComments', index.toString(), 'comments', commentId);
+              const commentSnap = await getDoc(commentRef);
+              const newDislikeCount = (commentSnap.exists() ? commentSnap.data().dislikeCount : 0) - 1;
+  
+              await updateDoc(commentRef, { dislikeCount: newDislikeCount });
+  
+              setCommentReactions((prevReactions) => {
+                  const newReactions = { ...prevReactions };
+                  newReactions[`${index}-${commentId}`] = {
+                      likeCount: prevReactions[`${index}-${commentId}`]?.likeCount || 0,
+                      dislikeCount: newDislikeCount,
+                  };
+                  return newReactions;
+              });
+          } else {
+              // User has not disliked this comment
+              const commentRef = doc(db, 'cryptoComments', index.toString(), 'comments', commentId);
+              const commentSnap = await getDoc(commentRef);
+              const newDislikeCount = (commentSnap.exists() ? commentSnap.data().dislikeCount : 0) + 1;
+  
+              await updateDoc(commentRef, { dislikeCount: newDislikeCount });
+  
+              await setDoc(userDislikeRef, { disliked: true });
+  
+              setCommentReactions((prevReactions) => {
+                  const newReactions = { ...prevReactions };
+                  newReactions[`${index}-${commentId}`] = {
+                      likeCount: prevReactions[`${index}-${commentId}`]?.likeCount || 0,
+                      dislikeCount: newDislikeCount,
+                  };
+                  return newReactions;
+              });
+          }
+      } catch (error) {
+          console.error('Error updating comment dislike count:', error);
+      }
+  }, debounceDelay);
+  
+  // Use the debounced functions for handling comment likes and dislikes when a user clicks the buttons
+ 
 
-      setCommentReactions((prevReactions) => {
-        const newReactions = { ...prevReactions };
-        newReactions[`${index}-${commentId}`] = {
-          likeCount: newLikeCount,
-          dislikeCount: prevReactions[`${index}-${commentId}`]?.dislikeCount || 0,
-        };
-        return newReactions;
-      });
-    } catch (error) {
-      console.error('Error liking comment:', error);
-    }
-  };
 
-  // Handle disliking a comment
-  const handleCommentDislike = async (index, commentId) => {
-    try {
-      const commentRef = doc(db, 'cryptoComments', index.toString(), 'comments', commentId);
-      const commentSnap = await getDoc(commentRef);
-      const newDislikeCount = (commentSnap.exists() ? commentSnap.data().dislikeCount || 0 : 0) + 1;
-
-      await updateDoc(commentRef, { dislikeCount: newDislikeCount });
-
-      setCommentReactions((prevReactions) => {
-        const newReactions = { ...prevReactions };
-        newReactions[`${index}-${commentId}`] = {
-          likeCount: prevReactions[`${index}-${commentId}`]?.likeCount || 0,
-          dislikeCount: newDislikeCount,
-        };
-        return newReactions;
-      });
-    } catch (error) {
-      console.error('Error disliking comment:', error);
-    }
-  };
-
-  // Handle changes in comment input text
   const handleInputTextChange = (index, value) => {
     setInputText((prevText) => ({
       ...prevText,
@@ -216,7 +492,6 @@ const Crypto = () => {
     }));
   };
 
-  // Toggle the visibility of comments for an article
   const toggleCommentsVisibility = (index) => {
     setCommentsVisible((prev) => ({
       ...prev,
@@ -226,8 +501,8 @@ const Crypto = () => {
 
   return (
     <>
-      <FinancialTimes/> {/* Import your crypto news component */}
-      <div className="mx-auto px-4 py-8 max-w-screen-xl">
+      <FinancialTimes />
+      <div className="mx-auto px-4 py-8 max-w-screen-xl hover:scale-100">
         <div>
           {newsData.map((article, index) => (
             <div key={index} className="w-full p-4 mb-4">
@@ -236,118 +511,120 @@ const Crypto = () => {
                   src={article.image}
                   alt={article.title}
                   className="w-full md:w-1/2 h-auto md:h-full object-cover cursor-pointer"
-                  onClick={() => window.open(article.url, '_blank')}
+                  onClick={() => goToArticle(article.url)}
                 />
                 <div className="p-6 flex-1">
                   <h2
-                    className="text-xl font-semibold text-gray-800 hover:underline cursor-pointer"
-                    onClick={() => window.open(article.url, '_blank')}
+                    className="text-xl font-bold mb-2 cursor-pointer"
+                    onClick={() => goToArticle(article.url)}
                   >
                     {article.title}
                   </h2>
-                  <p className="text-gray-600 mb-4">{article.description}</p>
-                  <div className="flex justify-between">
-                    <div className="flex items-center space-x-4">
-                      <button
-                        onClick={() => handleLike(index)}
-                        className="flex items-center text-gray-600 hover:text-gray-800"
-                      >
-                        <FontAwesomeIcon icon={faThumbsUp} className="mr-1" />
-                        {likeCounts[index] || 0}
-                      </button>
-                      <button
-                        onClick={() => handleDislike(index)}
-                        className="flex items-center text-gray-600 hover:text-gray-800"
-                      >
-                        <FontAwesomeIcon icon={faThumbsDown} className="mr-1" />
-                      </button>
-                      <button
-                        onClick={() => toggleCommentsVisibility(index)}
-                        className="flex items-center text-gray-600 hover:text-gray-800"
-                      >
-                        <FontAwesomeIcon icon={faComment} className="mr-1" />
-                        {comments[index] ? Object.keys(comments[index]).length : 0}
-                      </button>
-                    </div>
-                    <p className="text-gray-400 text-sm">{article.publishedAt}</p>
+                  <p className="text-gray-700">{article.description}</p>
+                  <div className="flex items-center mt-4">
+                    <button
+                      onClick={() => handleLike(index)}
+                      className="flex items-center p-2 rounded-full bg-gray-200 hover:bg-gray-300 mr-2"
+                    >
+                      <FontAwesomeIcon icon={faThumbsUp} />
+                    </button>
+                    <span>{likeCounts[index]}</span>
+                    <button
+                      onClick={() => handleDislike(index)}
+                      className="flex items-center p-2 rounded-full bg-gray-200 hover:bg-gray-300 ml-2"
+                    >
+                      <FontAwesomeIcon icon={faThumbsDown} />
+                    </button>
+                    <span className='ml-2'> {dislikeCounts[index]} </span>
+                    <button
+                      onClick={() => toggleCommentsVisibility(index)}
+                      className="ml-auto flex items-center p-2 rounded-full bg-gray-200 hover:bg-gray-300"
+                    >
+                      <FontAwesomeIcon icon={faComment} />
+                    </button>
                   </div>
                   {commentsVisible[index] && (
                     <div className="mt-4">
+                      <div className="flex items-center mb-2">
+                        <input
+                          type="text"
+                          value={inputText[index] || ''}
+                          onChange={(e) => handleInputTextChange(index, e.target.value)}
+                          className="flex-1 border rounded p-2 mr-2"
+                          placeholder="Write a comment..."
+                        />
+                        <button
+                          onClick={() => handleCommentSubmit(index)}
+                          className="p-2 bg-blue-500 text-white rounded"
+                        >
+                          Post
+                        </button>
+                      </div>
                       {comments[index] &&
-                        Object.entries(comments[index]).map(([commentId, commentData]) => (
-                          <div key={commentId} className="border-b border-gray-300 py-2">
-                            {editCommentId === commentId ? (
-                              <div className="flex space-x-2">
-                                <textarea
+                        Object.entries(comments[index]).map(([commentId, comment]) => (
+                          <div key={commentId} className="p-4 border-b">
+                            <div className="flex items-center">
+                              {editCommentId === commentId ? (
+                                // Edit comment input
+                                <input
+                                  type="text"
                                   value={editCommentText}
                                   onChange={(e) => setEditCommentText(e.target.value)}
-                                  className="w-full p-2 border border-gray-300 rounded"
+                                  className="flex-1 border rounded p-2 mr-2"
                                 />
-                                <button
-                                  onClick={() => handleCommentUpdate(index, commentId)}
-                                  className="ml-2"
-                                >
-                                  Save
-                                </button>
-                                <button
-                                  onClick={() => setEditCommentId(null)}
-                                  className="ml-2"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="flex justify-between items-center">
-                                <div>
-                                  <p>{commentData.text}</p>
-                                  <p className="text-xs text-gray-400">
-                                    {new Date(commentData.timestamp).toLocaleString()} {/* Display comment timestamp */}
+                              ) : (
+                                // Display comment text
+                                <div className="flex-1">
+                                  <p className="text-gray-700">{comment.text}</p>
+                                  <p className="text-gray-500 text-sm">
+                                    Posted on: {new Date(comment.timestamp.seconds * 1000).toLocaleString()}
                                   </p>
                                 </div>
-                                <div className="flex items-center space-x-2">
+                              )}
+                              <div className="flex items-center">
+                                <button
+                                  onClick={() => handleCommentLike(index, commentId)}
+                                  className="flex items-center p-2 rounded-full bg-gray-200 hover:bg-gray-300 mr-2"
+                                >
+                                  <FontAwesomeIcon icon={faThumbsUp} />
+                                </button>
+                                <span>{commentReactions[`${index}-${commentId}`]?.likeCount || 0}</span>
+                                <button
+                                  onClick={() => handleCommentDislike(index, commentId)}
+                                  className="flex items-center p-2 rounded-full bg-gray-200 hover:bg-gray-300 ml-2 mr-4"
+                                >
+                                  <FontAwesomeIcon icon={faThumbsDown} />
+                                </button>
+                                <span>{commentReactions[`${index}-${commentId}`]?.dislikeCount || 0}</span>
+                                {editCommentId === commentId ? (
+                                  // Save edited comment
                                   <button
-                                    onClick={() => handleCommentLike(index, commentId)}
-                                    className="flex items-center text-gray-600 hover:text-gray-800"
+                                    onClick={() => handleCommentUpdate(index, commentId)}
+                                    className="ml-2"
                                   >
-                                    <FontAwesomeIcon icon={faThumbsUp} className="mr-1" />
-                                    {commentReactions[`${index}-${commentId}`]?.likeCount || 0}
+                                    Save
                                   </button>
-                                  <button
-                                    onClick={() => handleCommentDislike(index, commentId)}
-                                    className="flex items-center text-gray-600 hover:text-gray-800"
-                                  >
-                                    <FontAwesomeIcon icon={faThumbsDown} className="mr-1" />
-                                    {commentReactions[`${index}-${commentId}`]?.dislikeCount || 0}
-                                  </button>
-                                  <button
-                                    onClick={() => handleCommentEdit(index, commentId, commentData.text)}
-                                    className="text-gray-600 hover:text-gray-800"
-                                  >
-                                    Edit
-                                  </button>
-                                  <button
-                                    onClick={() => handleCommentDelete(index, commentId)}
-                                    className="text-gray-600 hover:text-gray-800"
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
+                                ) : (
+                                  // Edit and delete buttons
+                                  <>
+                                    <button
+                                      onClick={() => handleCommentEdit(index, commentId, comment.text)}
+                                      className="ml-2"
+                                    >
+                                      Edit
+                                    </button>
+                                    <button
+                                      onClick={() => handleCommentDelete(index, commentId)}
+                                      className="ml-2 text-red-500"
+                                    >
+                                      Delete
+                                    </button>
+                                  </>
+                                )}
                               </div>
-                            )}
+                            </div>
                           </div>
                         ))}
-                      <textarea
-                        value={inputText[index] || ''}
-                        onChange={(e) => handleInputTextChange(index, e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded"
-                        placeholder="Add a comment..."
-                      />
-                      <button
-                        onClick={() => handleCommentSubmit(index)}
-                        className="mt-2 bg-blue-500 text-white px-4 py-1 rounded"
-                      >
-                        Post
-                      </button>
                     </div>
                   )}
                 </div>
