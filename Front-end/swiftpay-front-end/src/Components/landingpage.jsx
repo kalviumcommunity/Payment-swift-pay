@@ -162,7 +162,7 @@ function LandingPage() {
         </div>
         <div className="max-w-md text-center md:text-left md:ml-8">
           <h2 className="text-xl font-bold mb-2">Financial Solutions <span className='text-blue-500'>for</span> Everyone</h2>
-          <p className="text-sm md:text-lg text-wrap mb-4 md:ml-0">
+          <p className="text-sm md:text-lg text-wrap mb-4 md:ml-0 ">
             Our financial hub provides secure and reliable solutions for all users. We prioritize the security of your financial information, ensuring that your data is protected at all times. 
           </p>
           <a href="https://benevolent-kitsune-14ae9f.netlify.app/" className="text-blue-500 underline block mb-4" onClick={(e) => { e.preventDefault(); window.open('https://benevolent-kitsune-14ae9f.netlify.app/', '_blank'); }}>Learn more</a>

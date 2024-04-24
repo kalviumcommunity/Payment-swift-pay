@@ -129,7 +129,10 @@ const Business = () => {
 
         if (userLikeSnap.exists()) {
             // User has already liked this article, so remove their like
-            newCount = (docSnap.exists() ? docSnap.data().count : 0) - 1;
+            const currentCount = docSnap.exists() ? docSnap.data().count || 0 : 0;
+
+            // Calculate new like count, ensuring it does not go below zero
+            newCount = Math.max(currentCount - 1, 0);
 
             // Update like count in Firestore
             await setDoc(articleRef, { count: newCount }, { merge: true });
@@ -147,7 +150,8 @@ const Business = () => {
             console.log('User has unliked the article');
         } else {
             // User has not liked this article yet, so add their like
-            newCount = (docSnap.exists() ? docSnap.data().count : 0) + 1;
+            const currentCount = docSnap.exists() ? docSnap.data().count || 0 : 0;
+            newCount = currentCount + 1;
 
             // Update like count in Firestore
             await setDoc(articleRef, { count: newCount }, { merge: true });
@@ -167,7 +171,8 @@ const Business = () => {
     } catch (error) {
         console.error('Error updating like count:', error);
     }
-}, 300);
+}, 300); // Debounce delay set to 300 milliseconds
+
 
 
 const handleDislike = debounce(async (index) => {
@@ -187,7 +192,10 @@ const handleDislike = debounce(async (index) => {
 
           const articleRef = doc(db, 'dislikes', index.toString());
           const docSnap = await getDoc(articleRef);
-          const newCount = (docSnap.exists() ? docSnap.data().count || 0 : 0) - 1;
+          const currentCount = docSnap.exists() ? docSnap.data().count || 0 : 0;
+
+          // Calculate new dislike count, ensuring it does not go below zero
+          const newCount = Math.max(currentCount - 1, 0);
 
           // Update dislike count in Firestore
           await setDoc(articleRef, { count: newCount }, { merge: true });
@@ -201,7 +209,10 @@ const handleDislike = debounce(async (index) => {
       } else {
           const articleRef = doc(db, 'dislikes', index.toString());
           const docSnap = await getDoc(articleRef);
-          const newCount = (docSnap.exists() ? docSnap.data().count || 0 : 0) + 1;
+          const currentCount = docSnap.exists() ? docSnap.data().count || 0 : 0;
+
+          // Calculate new dislike count
+          const newCount = currentCount + 1;
 
           // Update dislike count in Firestore
           await setDoc(articleRef, { count: newCount }, { merge: true });
@@ -220,6 +231,7 @@ const handleDislike = debounce(async (index) => {
       console.error('Error updating dislike count:', error);
   }
 }, 300); // Debounce delay set to 300 milliseconds
+
 
 // Use the debounced handleDislike function
 
