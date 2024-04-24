@@ -1,12 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { db, auth } from '../../Firebase/Fire.config';
-import { collection, addDoc, onSnapshot, orderBy, query, serverTimestamp, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import {
+    collection,
+    addDoc,
+    onSnapshot,
+    orderBy,
+    query,
+    serverTimestamp,
+    deleteDoc,
+    doc,
+    updateDoc,
+} from 'firebase/firestore';
 import { format } from 'date-fns';
 
 const Chat = () => {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
-    const [editMessage, setEditMessage] = useState(null); // State for editing messages
+    const [editMessage, setEditMessage] = useState(null);
 
     const messagesRef = collection(db, 'appQuestions');
 
@@ -76,29 +86,43 @@ const Chat = () => {
     };
 
     return (
-        <div className="flex flex-col items-center h-screen bg-white text-gray-800">
-            <div className="w-4/5 h-3/4 overflow-y-auto border border-gray-300 p-4 mb-5 rounded-lg shadow-md bg-gray-100">
+        <div className="flex flex-col h-screen justify-between bg-white text-gray-800">
+            {/* Decrease the width of the chat messages display area */}
+            <div className="w-3/4 mx-auto h-4/5 overflow-y-auto border border-gray-300 p-4 rounded-lg bg-gray-100">
                 {/* Display messages */}
                 {messages.map((msg) => (
-                    <div key={msg.id} className="mb-4 p-3 bg-gray-50 rounded-lg shadow-sm">
+                    <div
+                        key={msg.id}
+                        className={`mb-4 p-3 rounded-lg shadow-sm ${
+                            msg.uid === auth.currentUser.uid ? 'bg-blue-100 text-right' : 'bg-gray-50 text-left'
+                        }`}
+                    >
                         <div className="flex items-center mb-2">
-                            <img
-                                src={msg.photoURL}
-                                alt="Avatar"
-                                className="w-10 h-10 rounded-full mr-3"
-                            />
+                            {msg.uid !== auth.currentUser.uid && (
+                                <img
+                                    src={msg.photoURL}
+                                    alt="Avatar"
+                                    className="w-8 h-8 rounded-full mr-3"
+                                />
+                            )}
                             <div>
                                 <strong className="block text-sm font-semibold">{msg.displayName}</strong>
                                 <span className="text-gray-500 text-xs">
-                                    {msg.createdAt ? format(new Date(msg.createdAt.seconds * 1000), 'dd/MM/yyyy HH:mm') : 'Unknown date'}
+                                    {msg.createdAt
+                                        ? format(new Date(msg.createdAt.seconds * 1000), 'dd/MM/yyyy HH:mm')
+                                        : 'Unknown date'}
                                 </span>
                             </div>
                         </div>
-                        <p className="text-gray-700 mb-2">{msg.text}</p>
+                        <p className={`inline-block p-2 rounded-lg ${
+                            msg.uid === auth.currentUser.uid ? 'bg-blue-200' : 'bg-gray-200'
+                        }`}>
+                            {msg.text}
+                        </p>
 
                         {/* Buttons for edit and delete */}
                         {auth.currentUser?.uid === msg.uid && (
-                            <div className="flex space-x-2">
+                            <div className="flex space-x-2 mt-2">
                                 <button
                                     className="bg-blue-500 text-white px-2 py-1 rounded-lg"
                                     onClick={() => handleEdit(msg)}
@@ -118,13 +142,13 @@ const Chat = () => {
             </div>
 
             {/* Form to send a message */}
-            <form onSubmit={sendMessage} className="w-4/5 flex">
+            <form onSubmit={sendMessage} className="w-full flex p-4 bg-gray-200">
                 <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Type a message..."
-                    className="flex-grow px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 mr-3 bg-gray-50 text-gray-700"
+                    className="flex-grow px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 mr-3 bg-white text-gray-700"
                 />
                 <button
                     type="submit"

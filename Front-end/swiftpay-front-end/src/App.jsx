@@ -21,7 +21,7 @@ import Business from './Components/Bussiness.jsx';
 import Finance from './Components/Finance.jsx';
 import Stock from './Components/Stock.jsx';
 import Blog from './Components/Blog.jsx';
-import Chat from './Components/LF.jsx';
+import Chat from './Components/Chat.jsx';
 
 
 
