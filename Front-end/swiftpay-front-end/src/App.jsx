@@ -21,7 +21,10 @@ import Business from './Components/Bussiness.jsx';
 import Finance from './Components/Finance.jsx';
 import Stock from './Components/Stock.jsx';
 import Blog from './Components/Blog.jsx';
-import Chat from './Components/Chat.jsx';
+
+import MyComponent from './Components/Financelanding.jsx';
+
+import ExchangeRateCalculator from './Components/Convert.jsx';
 
 
 
@@ -45,9 +48,12 @@ function App() {
       <Route path='/Business' element={<Layout><Business/></Layout>}/>
       <Route path='/Finance' element={<Layout><Finance/></Layout>}/>
       <Route path='/Stock' element={<Layout><Stock/></Layout>}/>
-      <Route path='/chat' element={<Chat/>}/>
+      <Route path='/Flanding' element={<MyComponent/>}/>
+      <Route path='/Exchange' element={<ExchangeRateCalculator/>}/>
     </Routes>
     </BrowserRouter>
+    
+  
  
   );
  

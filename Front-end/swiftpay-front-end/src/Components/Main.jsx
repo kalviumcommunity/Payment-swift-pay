@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 function Main() {
   return (
     <div><Link to='/Business'><button>Business</button></Link>
-    <Link to='/chat'>chat</Link>
+    <Link to='/Exchange'>Convert</Link>
     
     </div>
     
