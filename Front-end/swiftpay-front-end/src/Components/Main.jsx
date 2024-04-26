@@ -5,6 +5,7 @@ function Main() {
   return (
     <div><Link to='/Business'><button>Business</button></Link>
     <Link to='/Exchange'>Convert</Link>
+    <Link to='/Coin'>coin</Link>
     
     </div>
     

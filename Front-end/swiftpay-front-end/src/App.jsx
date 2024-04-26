@@ -25,6 +25,7 @@ import Blog from './Components/Blog.jsx';
 import MyComponent from './Components/Financelanding.jsx';
 
 import ExchangeRateCalculator from './Components/Convert.jsx';
+import CoinGeckoTable from './Components/Tracker.jsx';
 
 
 
@@ -50,6 +51,7 @@ function App() {
       <Route path='/Stock' element={<Layout><Stock/></Layout>}/>
       <Route path='/Flanding' element={<MyComponent/>}/>
       <Route path='/Exchange' element={<ExchangeRateCalculator/>}/>
+      <Route path='/Coin' element={<CoinGeckoTable/>}/>
     </Routes>
     </BrowserRouter>
     
