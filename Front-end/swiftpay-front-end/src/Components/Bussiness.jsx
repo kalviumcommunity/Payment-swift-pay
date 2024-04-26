@@ -6,6 +6,7 @@ import { db,auth } from '../../Firebase/Fire.config';
 import { onAuthStateChanged } from 'firebase/auth';
 import {toast} from "react-toastify"
 import { debounce } from 'lodash';
+import './Bussiness.css';
 
 
 import {
@@ -39,7 +40,7 @@ const Business = () => {
   // State for comment reactions (like and dislike counts for each comment)
   const [commentReactions, setCommentReactions] = useState({});
 
-
+  const shouldHideComments = window.innerWidth <= 768;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -513,7 +514,9 @@ const handleCommentEdit = async (index, commentId) => {
                     </button>
                   </div>
                   {commentsVisible[index] && (
-                    <div className="mt-4">
+                    <div className="mt-4"  style={{
+                      display: shouldHideComments ? 'none' : 'block', // Hide comments if screen width <= 320px
+                  }}>
                       <div className="flex items-center mb-2">
                         <input
                           type="text"

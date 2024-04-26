@@ -108,6 +108,8 @@ const Crypto = () => {
    // Delay in milliseconds for debouncing
    const debounceDelays=300
 
+   const shouldHideComments = window.innerWidth <= 768;
+
 // Debounced function for handling likes
 const handleLike = debounce(async (index) => {
     try {
@@ -544,7 +546,10 @@ const handleCommentEdit = async (index, commentId) => {
                     </button>
                   </div>
                   {commentsVisible[index] && (
-                    <div className="mt-4">
+                    <div className="mt-4"
+                    style={{
+                      display: shouldHideComments ? 'none' : 'block', // Hide comments if screen width <= 320px
+                  }}>
                       <div className="flex items-center mb-2">
                         <input
                           type="text"

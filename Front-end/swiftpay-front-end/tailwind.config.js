@@ -8,7 +8,9 @@ export default {
     extend: {},
   },
   plugins: [
-    require("@designbycode/tailwindcss-text-shadow")
+    require("@designbycode/tailwindcss-text-shadow"),
+
+    
   ],
 }
 

@@ -1,38 +1,90 @@
 import React from 'react';
-import './Flanding.css'
 
-const content = [
-  { title: "Let's Get to Know One Another", image: 'https://images.unsplash.com/photo-1597487389339-5591e52de66f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MXwxNDU4OXwwfDF8cmFuZG9tfHx8fHx8fHw&ixlib=rb-1.2.1&q=80&w=1200' },
-  { title: "Some Stuff I Need to Get Off My Chest", image: 'https://images.unsplash.com/photo-1597201424013-0e06a7018fbd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MXwxNDU4OXwwfDF8cmFuZG9tfHx8fHx8fHw&ixlib=rb-1.2.1&q=80&w=1200' },
-  { title: "Call Me, Maybe", image: 'https://images.unsplash.com/photo-1543408458-baf63378be13?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MXwxNDU4OXwwfDF8cmFuZG9tfHx8fHx8fHw&ixlib=rb-1.2.1&q=80&w=1200' }
-];
 
-function DatingIpsum() {
-    return (
-        <div>
-            <header className="header">
-                <h1 className="page-title">CSS position sticky parallax effect</h1>
-            </header>
-            <main className="main">
-                {content.map((item, index) => (
-                    <section key={index} className="section">
-                        <figure className="image-container">
-                            <img src={item.image} alt={item.title} />
-                        </figure>
-                        <article className="content">
-                            <h2 className="section-title">{item.title}</h2>
-                            <span className="byline">Content provided by <a href="https://laurenhallden.com/datingipsum/" target="_blank" rel="noreferrer">the online dating ipsum generator →</a></span>
-                            <p>If I make fun of you, it's because I like you...</p>
-                            {/* Add additional content paragraphs as necessary */}
-                        </article>
-                    </section>
-                ))}
-            </main>
-            <footer className="footer">
-                Fin.
-            </footer>
+const MyComponent = () => {
+  return (
+    <div className="main-content">
+      <div className="concept concept-one">
+        {/* Loop from 1 to 9 */}
+        {Array.from({ length: 9 }, (_, i) => (
+          <div key={i} className={`hover hover-${i + 1}`} />
+        ))}
+        <h1>Desert</h1>
+      </div>
+
+      <div className="concept concept-two">
+        {/* Loop through each letter in 'FOREST' */}
+        {['F', 'O', 'R', 'E', 'S', 'T'].map((val, index) => (
+          <div key={index} className="hover">
+            <h1>{val}</h1>
+          </div>
+        ))}
+      </div>
+
+      <div className="concept concept-three">
+        {/* Loop through each letter in 'CANYON' */}
+        <div className="word">
+          {['C', 'A', 'N', 'Y', 'O', 'N'].map((val, index) => (
+            <div key={index} className="hover">
+              <div></div>
+              <div></div>
+              <h1>{val}</h1>
+            </div>
+          ))}
         </div>
-    );
-}
+      </div>
 
-export default DatingIpsum;
+      <div className="concept concept-four">
+        <h1>Glacier</h1>
+      </div>
+
+      <div className="concept concept-five">
+        <h1 className="word">
+          {/* Loop through each letter in 'MOUNTAINS' */}
+          {['B', 'I', 'T', 'C', 'O', 'I', 'N'].map((val, index) => (
+            <span key={index} className="char">{val}</span>
+          ))}
+        </h1>
+      </div>
+
+      <div className="concept concept-six">
+        <h1 className="word">
+          {/* Loop through each letter in 'OCEAN' */}
+          {['O', 'C', 'E', 'A', 'N'].map((val, index) => (
+            <span key={index} className="char">{val}</span>
+          ))}
+        </h1>
+      </div>
+
+      <div className="concept concept-seven">
+        <h1>Fries</h1>
+      </div>
+
+      <div className="concept concept-eight">
+        <h1 className="word">
+          {/* Loop through each letter in 'FALLS' */}
+          {['F', 'A', 'L', 'L', 'S'].map((val, index) => (
+            <div key={index} className="char" data-content={val}>
+              {val}
+            </div>
+          ))}
+        </h1>
+      </div>
+
+      <footer-main>
+        {/* Links with icons */}
+        <a href="https://twitter.com/meowlivia_" target="_blank" rel="noopener noreferrer">
+          <i className="icon-social-twitter icons" />
+        </a>
+        <a href="https://github.com/oliviale" target="_blank" rel="noopener noreferrer">
+          <i className="icon-social-github icons" />
+        </a>
+        <a href="https://dribbble.com/oliviale" target="_blank" rel="noopener noreferrer">
+          <i className="icon-social-dribbble icons" />
+        </a>
+      </footer-main>
+    </div>
+  );
+};
+
+export default MyComponent;
