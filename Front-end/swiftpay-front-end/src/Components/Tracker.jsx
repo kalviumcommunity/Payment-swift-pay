@@ -7,7 +7,7 @@ const CoinGeckoTable = () => {
     const [currency, setCurrency] = useState('inr'); // Initial currency set to INR
     const [country, setCountry] = useState('India'); // Initial country set to India
 
-    const apiKey = 'CG-Mzh8LVzuauvkW2BX8YpYr5Hp';
+    const apiKey ='CG-Mzh8LVzuauvkW2BX8YpYr5Hp';
 
     const fetchTrendingData = async () => {
         try {
