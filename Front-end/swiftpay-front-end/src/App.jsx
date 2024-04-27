@@ -21,11 +21,10 @@ import Business from './Components/Bussiness.jsx';
 import Finance from './Components/Finance.jsx';
 import Stock from './Components/Stock.jsx';
 import Blog from './Components/Blog.jsx';
-
 import MyComponent from './Components/Financelanding.jsx';
-
 import ExchangeRateCalculator from './Components/Convert.jsx';
 import CoinGeckoTable from './Components/Tracker.jsx';
+
 
 
 
@@ -54,6 +53,7 @@ function App() {
       <Route path='/Coin' element={<CoinGeckoTable/>}/>
     </Routes>
     </BrowserRouter>
+  
     
   
  
