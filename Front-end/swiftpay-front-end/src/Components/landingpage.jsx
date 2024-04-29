@@ -14,6 +14,8 @@ import men from "./../images/man.png"
 import CustomFooter from './Footer';
 import Loading from './Loading'; // Import the Loading component
 
+import CrispChat from './chat-2';
+
 function LandingPage() {
   const [showContent, setShowContent] = useState(false);
   const [showImage, setShowImage] = useState(false);
@@ -181,6 +183,7 @@ function LandingPage() {
           <img className="women" src={men} alt="Women" style={{ width: '100%', maxWidth: '400px', height: 'auto' }} />
         </div>
       </div>
+     <CrispChat/>
       <CustomFooter/>
     </>
   );
