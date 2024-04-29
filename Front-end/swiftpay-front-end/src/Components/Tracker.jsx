@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect} from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
+import TradingViewWidget from './Stockmarket';
+
 
 const CoinGeckoTable = () => {
     const [coins, setCoins] = useState([]);
-    const [currency, setCurrency] = useState('inr'); // Initial currency set to INR
-    const [country, setCountry] = useState('India'); // Initial country set to India
+    const [currency, setCurrency] = useState('inr'); 
+    const [country, setCountry] = useState('India'); 
+    const [isLaptopView, setIsLaptopView] = useState(window.innerWidth >= 1024);
 
     const apiKey ='CG-Mzh8LVzuauvkW2BX8YpYr5Hp';
 
@@ -79,7 +82,22 @@ const CoinGeckoTable = () => {
         setCurrency(countryCurrencyMap[selectedCountry] || 'usd'); // Use USD as the default currency if country is not found
     };
 
+    useEffect(() => {
+        const handleResize = () => {
+            setIsLaptopView(window.innerWidth >= 1024);
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        // Cleanup the event listener on unmount
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
     return (
+        <>
+          {isLaptopView && <TradingViewWidget />}
         <div className="mx-auto mt-8 flex justify-center">
             <div className="w-3/4">
                 <h2 className="text-2xl font-bold mb-4 text-center">Coin Market Data</h2>
@@ -167,6 +185,7 @@ const CoinGeckoTable = () => {
                 </p>
             </div>
         </div>
+        </>
     );
 };
 
