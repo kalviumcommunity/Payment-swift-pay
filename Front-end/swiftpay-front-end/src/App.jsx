@@ -23,16 +23,18 @@ import Stock from './Components/Stock.jsx';
 import Blog from './Components/Blog.jsx';
 import ExchangeRateCalculator from './Components/Convert.jsx';
 import CoinGeckoTable from './Components/Tracker.jsx';
-import CryptoAnalysis from './Components/prediction.jsx';
-import CoinDetails from './Components/prediction.jsx';
-import Compare from './Components/prediction.jsx';
-import BudgetApp from './Components/prediction.jsx';
+import CryptoAnalysis from './Components/BudgetApp.jsx';
+import CoinDetails from './Components/BudgetApp.jsx';
+import Compare from './Components/BudgetApp.jsx';
+import BudgetApp from './Components/BudgetApp.jsx';
 import SmartsuppChat from './Components/Whatsapp.jsx';
 import TradingViewWidget from './Components/Stockmarket.jsx';
 import TradingViewMiniSymbolOverview from './Components/Stockmarket.jsx';
 import Edlanding from './Components/Edlanding.jsx';
 import LearningLandingPage from './Components/Edlanding.jsx';
-import CrispChat from './Components/chat-2.jsx';
+import BlogApp from './Components/Blog.jsx';
+
+
 
 
 
@@ -59,17 +61,15 @@ function App() {
       <Route path='/Exchange' element={<ExchangeRateCalculator/>}/>
       <Route path='/Coin' element={<CoinGeckoTable/>}/>
       <Route path='/Learning' element={<LearningLandingPage/>}/>
-  
-    </Routes>
-    </BrowserRouter>
-  
-   
-
-
+      <Route path='/Blog' element={<BlogApp/>}/>
   
     
-  
- 
+    </Routes>
+    </BrowserRouter>
+   
+
+   
+    
   );
  
 }
