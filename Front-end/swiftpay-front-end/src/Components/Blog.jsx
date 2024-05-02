@@ -9,7 +9,7 @@ import {
   doc,
   onSnapshot,
   deleteDoc,
-} from 'firebase/firestore';
+} from 'firebase/firestore' ;
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 console.log(auth)
 
