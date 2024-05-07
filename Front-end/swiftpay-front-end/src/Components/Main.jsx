@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom'
 
 function Main() {
   return (
-    <div><Link to='/Business'><button>Business</button></Link>
+    <div><Link to='/News'><button>News</button></Link>
     <Link to='/Exchange'>Convert</Link>
-    <Link to='/Coin'>coin</Link>
+    <Link to='/Landing'>coinlanding</Link>
     <Link to='/Blog'>Blog</Link>
+    <Link to='/To'>Todo</Link>
     
     </div>
     

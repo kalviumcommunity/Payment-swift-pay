@@ -13,7 +13,6 @@ import TermsAndConditions from './Components/Terms.jsx';
 import PrivacyPolicy from './Components/Privacy.jsx';
 import ForgotPassword from './Components/ForgotPassword.jsx';
 import Feedback from './Components/feedback.jsx';
-import Chatbot from './Components/Chatbot.jsx';
 import NewsComponent from './Components/news.jsx';
 import FinancialTimes from './Components/news.jsx';
 import Crypto from './Components/Crypto.jsx';
@@ -33,6 +32,11 @@ import TradingViewMiniSymbolOverview from './Components/Stockmarket.jsx';
 import Edlanding from './Components/Edlanding.jsx';
 import LearningLandingPage from './Components/Edlanding.jsx';
 import BlogApp from './Components/Blog.jsx';
+import LandingPage from './Components/sample.jsx';
+import TOdo from './Components/Todo.jsx';
+import NewsPage from './Components/NewsLanding.jsx';
+import ExpenseTracker from './Components/Bud.jsx';
+
 
 
 
@@ -62,14 +66,12 @@ function App() {
       <Route path='/Coin' element={<CoinGeckoTable/>}/>
       <Route path='/Learning' element={<LearningLandingPage/>}/>
       <Route path='/Blog' element={<BlogApp/>}/>
-  
-    
+      <Route path='/To' element={<TOdo/>}/>
+      <Route path='/News' element={<NewsPage/>}/>
+      <Route path='/Landing' element={<LandingPage/>}/>
     </Routes>
     </BrowserRouter>
-   
-
-   
-    
+    // <ExpenseTracker/>
   );
  
 }
