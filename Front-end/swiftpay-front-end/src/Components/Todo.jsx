@@ -175,7 +175,7 @@ const TOdo = () => {
     return (
         <div className="mx-auto py-10 px-4">
             <img src="" alt="" />
-            <h1 className="text-4xl font-bold text-center mb-8 text-blue-500">To-Do List</h1>
+            <h1 className="text-4xl   font-bold text-center mb-8 text-blue-500">To-Do List</h1>
 
             {/* Notification for tasks due today */}
             {dueTodayTasks.length > 0 && (
