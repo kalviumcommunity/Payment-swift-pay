@@ -8,15 +8,15 @@ import {
   doc,
   deleteDoc,
   updateDoc,
-  getDocs,
-  setDoc
+  setDoc,
+  getDoc
 } from 'firebase/firestore';
 import { auth, db } from '../../Firebase/Fire.config'; // Import Firebase configuration
-import './B.css'; // Import CSS file
 
 const BudgetApp = () => {
   // State variables
   const [budget, setBudget] = useState(() => {
+    // Initial budget retrieval from local storage
     const savedBudget = localStorage.getItem('budget');
     return savedBudget ? parseFloat(savedBudget) : 0;
   });
@@ -34,12 +34,13 @@ const BudgetApp = () => {
   // Calculate balance
   const balance = budget - totalExpenditure;
 
-  // Retrieve expenses from Firestore based on user ID
+  // Fetch expenses from Firestore based on user email
   useEffect(() => {
-    const userId = auth.currentUser ? auth.currentUser.uid : null;
-    if (userId) {
+    const userEmail = auth.currentUser ? auth.currentUser.email : null;
+
+    if (userEmail) {
       const expensesCollection = collection(db, 'expenses');
-      const expensesQuery = query(expensesCollection, where('userId', '==', userId));
+      const expensesQuery = query(expensesCollection, where('userEmail', '==', userEmail));
 
       const unsubscribe = onSnapshot(expensesQuery, (snapshot) => {
         const fetchedExpenses = [];
@@ -53,20 +54,37 @@ const BudgetApp = () => {
     }
   }, []);
 
-  // Set budget and save to Firestore or local storage
+  // Fetch the budget from Firestore based on user email
+  useEffect(() => {
+    const userEmail = auth.currentUser ? auth.currentUser.email : null;
+
+    if (userEmail) {
+      const budgetDocRef = doc(db, 'budgets', userEmail);
+      getDoc(budgetDocRef)
+        .then((doc) => {
+          if (doc.exists()) {
+            setBudget(doc.data().budget);
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching budget:', error);
+        });
+    }
+  }, []);
+
+  // Set budget and save to Firestore
   const handleSetBudget = async () => {
     if (budget <= 0) {
       setBudgetError(true);
     } else {
       setBudgetError(false);
       localStorage.setItem('budget', budget); // Save budget to local storage
-      
-      const userId = auth.currentUser ? auth.currentUser.uid : null;
-      
-      // Save budget to Firestore for authenticated users
-      if (userId) {
+
+      const userEmail = auth.currentUser ? auth.currentUser.email : null;
+
+      if (userEmail) {
         try {
-          const budgetDocRef = doc(db, 'budgets', userId);
+          const budgetDocRef = doc(db, 'budgets', userEmail);
           await setDoc(budgetDocRef, { budget });
           console.log('Budget set successfully in Firestore!');
         } catch (error) {
@@ -84,15 +102,15 @@ const BudgetApp = () => {
       return;
     }
     setTitleError(false);
-    
+
     const cost = parseFloat(productCost);
     if (isNaN(cost) || cost <= 0) {
       setTitleError(true);
       return;
     }
-    
-    const userId = auth.currentUser ? auth.currentUser.uid : null;
-    
+
+    const userEmail = auth.currentUser ? auth.currentUser.email : null;
+
     try {
       if (currentExpenseId) {
         // Update existing expense
@@ -105,24 +123,12 @@ const BudgetApp = () => {
         const newExpense = {
           title: productTitle,
           cost,
-          userId,
+          userEmail,
         };
 
         await addDoc(collection(db, 'expenses'), newExpense);
         console.log('Expense added successfully!');
       }
-
-      // After adding or updating an expense, re-fetch the expenses from Firestore
-      const expensesCollection = collection(db, 'expenses');
-      const expensesQuery = query(expensesCollection, where('userId', '==', userId));
-      const snapshot = await getDocs(expensesQuery);
-      
-      const fetchedExpenses = [];
-      snapshot.forEach((doc) => {
-        fetchedExpenses.push({ id: doc.id, ...doc.data() });
-      });
-      
-      setExpenses(fetchedExpenses);
     } catch (error) {
       console.error('Error adding/updating expense:', error);
     }
@@ -145,19 +151,6 @@ const BudgetApp = () => {
       const expenseDoc = doc(db, 'expenses', expenseId);
       await deleteDoc(expenseDoc);
       console.log('Expense deleted successfully!');
-
-      // After deleting an expense, re-fetch the expenses from Firestore
-      const userId = auth.currentUser ? auth.currentUser.uid : null;
-      const expensesCollection = collection(db, 'expenses');
-      const expensesQuery = query(expensesCollection, where('userId', '==', userId));
-      const snapshot = await getDocs(expensesQuery);
-
-      const fetchedExpenses = [];
-      snapshot.forEach((doc) => {
-        fetchedExpenses.push({ id: doc.id, ...doc.data() });
-      });
-
-      setExpenses(fetchedExpenses);
     } catch (error) {
       console.error('Error deleting expense:', error);
     }

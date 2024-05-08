@@ -6,7 +6,7 @@ function Main() {
     <div><Link to='/News'><button>News</button></Link>
     <Link to='/Exchange'>Convert</Link>
     <Link to='/Landing'>coinlanding</Link>
-    <Link to='/Blog'>Blog</Link>
+    <Link to='/FinancialLanding'>blog</Link>
     <Link to='/To'>Todo</Link>
     
     </div>
