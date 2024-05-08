@@ -19,12 +19,6 @@ Accessing Financial News: Navigate to the "Financial News" section within Financ
 
 Joining Forum Discussions: Participate in forum discussions by accessing the "Forum" feature. Browse existing topics or start new discussions to connect with peers and gain valuable insights.
 
-Posting Blogs: Share your expertise and contribute to the community by posting blogs. Access the blogging feature within Financial Hub to create and publish articles on finance-related topics of interest.
-
-Processing Payments: Utilize the payment processing functionality within Financial Hub to manage invoices, receive payments, and track transactions. Set up payment gateways and configure payment methods according to your business requirements.
-
-Managing Expenses: Monitor and manage expenses efficiently using the expense calculation tools provided by Financial Hub. Log expenses, track spending, and generate reports to gain visibility into your financial activities.
-
 Support and Maintenance
 Documentation: Refer to the user manual and help guides within Financial Hub for assistance with accessing financial news, participating in forum discussions, posting blogs, processing payments, and managing expenses.
 
