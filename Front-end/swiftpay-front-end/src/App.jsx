@@ -32,15 +32,12 @@ import TradingViewMiniSymbolOverview from './Components/Stockmarket.jsx';
 import Edlanding from './Components/Edlanding.jsx';
 import LearningLandingPage from './Components/Edlanding.jsx';
 import BlogApp from './Components/Blog.jsx';
-import LandingPage from './Components/sample.jsx';
+import LandingPage from './Components/CryptoLanding.jsx';
 import TOdo from './Components/Todo.jsx';
 import NewsPage from './Components/NewsLanding.jsx';
-import ExpenseTracker from './Components/Bud.jsx';
-
-
-
-
-
+import Chat from './Components/Gemini.jsx';
+import FinanceBlogLandingPage from './Components/Financiallanding.jsx';
+import BudgetLanding from './Components/BudgetLanding.jsx';
 
 
 function App() {
@@ -69,9 +66,13 @@ function App() {
       <Route path='/To' element={<TOdo/>}/>
       <Route path='/News' element={<NewsPage/>}/>
       <Route path='/Landing' element={<LandingPage/>}/>
+      <Route path='/Budget' element={<BudgetApp/>}/>
+      <Route path='/FinancialLanding' element={<FinanceBlogLandingPage/>}/>
+      <Route path='/Blanding' element={<BudgetLanding/>}/>
     </Routes>
     </BrowserRouter>
-    // <ExpenseTracker/>
+    // <Chat/>
+
   );
  
 }
