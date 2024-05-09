@@ -19,10 +19,13 @@ import sgMail from '@sendgrid/mail';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+
+
 const TOdo = () => {
     const [task, setTask] = useState('');
     const [priority, setPriority] = useState('Medium');
     const [dueDate, setDueDate] = useState('');
+    const [dueTime, setDueTime] = useState('');
     const [category, setCategory] = useState('');
     const [notes, setNotes] = useState('');
     const [recurrence, setRecurrence] = useState('');
@@ -31,6 +34,8 @@ const TOdo = () => {
     const [pendingTasks, setPendingTasks] = useState([]);
 
     const navigate = useNavigate();
+
+  
 
     // Monitor authentication state
     useEffect(() => {
@@ -50,37 +55,41 @@ const TOdo = () => {
             const tasksQuery = query(tasksCollection, where('userEmail', '==', currentUser.email));
             const unsubscribe = onSnapshot(tasksQuery, (querySnapshot) => {
                 const tasksList = [];
-                const pendingTasksList = [];
 
                 querySnapshot.forEach((doc) => {
                     const task = { id: doc.id, ...doc.data() };
                     tasksList.push(task);
-
-                    if (isTaskOverdue(task)) {
-                        pendingTasksList.push(task);
-                    }
                 });
 
                 setTasks(tasksList);
-                setPendingTasks(pendingTasksList);
-
-                if (pendingTasksList.length > 0) {
-                    toast.warn(`You have ${pendingTasksList.length} pending task(s).`, {
-                        position: "top-right",
-                        autoClose: 3000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                    });
-                }
-
+                updatePendingTasks(tasksList);
                 checkTasksDueToday(tasksList);
             });
 
             return () => unsubscribe();
         }
     }, [currentUser]);
+
+    // Function to update the pending tasks list based on due time
+    const updatePendingTasks = (tasksList) => {
+        const currentDateTime = new Date();
+        const overdueTasks = tasksList.filter(task => {
+            const dueDateTime = new Date(`${task.dueDate}T${task.dueTime || '00:00'}`);
+            return !task.completed && dueDateTime < currentDateTime;
+        });
+        setPendingTasks(overdueTasks);
+
+        if (overdueTasks.length > 0) {
+            toast.warn(`You have ${overdueTasks.length} pending task(s).`, {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
+        }
+    };
 
     // Check for tasks due today and send email notifications
     const checkTasksDueToday = (tasksList) => {
@@ -91,28 +100,6 @@ const TOdo = () => {
         }
     };
 
-    // Send email notification for tasks due today
-    const sendEmailNotification = async (tasks) => {
-        const user = currentUser;
-        const email = user.email;
-
-        tasks.forEach(async (task) => {
-            const msg = {
-                to: email,
-                from: 'your-email@example.com', // Use your email address here
-                subject: 'Task Due Today',
-                text: `Your task "${task.task}" is due today. Please complete it.`,
-            };
-
-            try {
-                await sgMail.send(msg);
-                console.log(`Email notification sent for task: ${task.task}`);
-            } catch (error) {
-                console.error('Error sending email notification:', error);
-            }
-        });
-    };
-
     // Add a new task
     const addTask = async (e) => {
         e.preventDefault();
@@ -121,6 +108,7 @@ const TOdo = () => {
                 task,
                 priority,
                 dueDate,
+                dueTime,
                 category,
                 notes,
                 recurrence,
@@ -130,10 +118,11 @@ const TOdo = () => {
             };
 
             try {
-                const docRef = await addDoc(collection(db, 'tasks'), newTask);
+                await addDoc(collection(db, 'tasks'), newTask);
                 setTask('');
                 setPriority('Medium');
                 setDueDate('');
+                setDueTime('');
                 setCategory('');
                 setNotes('');
                 setRecurrence('');
@@ -165,8 +154,9 @@ const TOdo = () => {
 
     // Check if a task is overdue
     const isTaskOverdue = (task) => {
-        const today = new Date().toISOString().split('T')[0];
-        return !task.completed && task.dueDate < today;
+        const currentDateTime = new Date();
+        const dueDateTime = new Date(`${task.dueDate}T${task.dueTime || '00:00'}`);
+        return !task.completed && dueDateTime < currentDateTime;
     };
 
     // Handle task recurrence at midnight
@@ -226,8 +216,8 @@ const TOdo = () => {
     };
 
     return (
-        <div className=" mx-auto py-10 px-4">
-            <img className="w-10 h-10 ml-9" src={bull} alt="" />
+        <div className="mx-auto py-10 px-4">
+            <img className="w-10 h-10 " src={bull} alt="" />
             <h1 className="text-4xl font-bold text-center mb-8 text-blue-500">Fiscal Focus</h1>
 
             {/* React Toastify container */}
@@ -263,6 +253,14 @@ const TOdo = () => {
                         />
                     </div>
 
+                    {/* Time input below date input */}
+                    <input
+                        type="time"
+                        value={dueTime}
+                        onChange={(e) => setDueTime(e.target.value)}
+                        className="input input-bordered input-primary w-full"
+                    />
+
                     <input
                         type="text"
                         placeholder="Category"
@@ -295,7 +293,7 @@ const TOdo = () => {
 
             {/* Task list */}
             <div className="w-full max-w-md mx-auto">
-                {tasks.map(task => {
+                {tasks.map((task) => {
                     const overdue = isTaskOverdue(task);
                     return (
                         <div
@@ -332,6 +330,7 @@ const TOdo = () => {
                             <div className="flex flex-col space-y-1">
                                 <p className="text-sm text-gray-600">Priority: {task.priority}</p>
                                 <p className="text-sm text-gray-600">Due Date: {task.dueDate}</p>
+                                <p className="text-sm text-gray-600">Due Time: {task.dueTime || '00:00'}</p>
                                 <p className="text-sm text-gray-600">Category: {task.category}</p>
                                 <p className="text-sm text-gray-600">Notes: {task.notes}</p>
                                 <p className="text-sm text-gray-600">Recurrence: {task.recurrence || 'None'}</p>

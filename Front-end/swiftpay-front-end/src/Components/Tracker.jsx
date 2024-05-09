@@ -1,16 +1,29 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import TradingViewWidget from './Stockmarket';
-
 
 const CoinGeckoTable = () => {
     const [coins, setCoins] = useState([]);
     const [currency, setCurrency] = useState('inr'); 
     const [country, setCountry] = useState('India'); 
     const [isLaptopView, setIsLaptopView] = useState(window.innerWidth >= 1024);
+    const [watchlist, setWatchlist] = useState([]);
 
-    const apiKey ='CG-Mzh8LVzuauvkW2BX8YpYr5Hp';
+    const apiKey = 'CG-Mzh8LVzuauvkW2BX8YpYr5Hp';
+
+    // Load watchlist from local storage
+    useEffect(() => {
+        const savedWatchlist = localStorage.getItem('watchlist');
+        if (savedWatchlist) {
+            setWatchlist(JSON.parse(savedWatchlist));
+        }
+    }, []);
+
+    // Save watchlist to local storage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('watchlist', JSON.stringify(watchlist));
+    }, [watchlist]);
 
     const fetchTrendingData = async () => {
         try {
@@ -77,9 +90,20 @@ const CoinGeckoTable = () => {
     const handleCountryChange = (event) => {
         const selectedCountry = event.target.value;
         setCountry(selectedCountry);
+        setCurrency(countryCurrencyMap[selectedCountry] || 'usd');
+    };
 
-        // Set the currency based on the selected country
-        setCurrency(countryCurrencyMap[selectedCountry] || 'usd'); // Use USD as the default currency if country is not found
+    // Function to check if a coin is in the watchlist
+    const isCoinInWatchlist = (coinId) => watchlist.includes(coinId);
+
+    // Function to add a coin to the watchlist
+    const addToWatchlist = (coinId) => {
+        setWatchlist((prevWatchlist) => [...prevWatchlist, coinId]);
+    };
+
+    // Function to remove a coin from the watchlist
+    const removeFromWatchlist = (coinId) => {
+        setWatchlist((prevWatchlist) => prevWatchlist.filter((id) => id !== coinId));
     };
 
     useEffect(() => {
@@ -89,7 +113,6 @@ const CoinGeckoTable = () => {
 
         window.addEventListener('resize', handleResize);
 
-        // Cleanup the event listener on unmount
         return () => {
             window.removeEventListener('resize', handleResize);
         };
@@ -97,28 +120,38 @@ const CoinGeckoTable = () => {
 
     return (
         <>
-          {isLaptopView && <TradingViewWidget />}
-        <div className="mx-auto mt-8 flex justify-center">
-            <div className="w-3/4">
-                <h2 className="text-2xl font-bold mb-4 text-center">Coin Market Data</h2>
+            {isLaptopView && <TradingViewWidget />}
+            <div className="mx-auto mt-8 flex justify-center">
+                <div className="w-3/4">
+                    <h2 className="text-2xl font-bold mb-4 text-center">Coin Market Data</h2>
 
-                {/* Dropdown to select country */}
-                <div className="mb-4 text-center">
-                    <label htmlFor="country" className="mr-2">
-                        Select Country:
-                    </label>
-                    <select
-                        id="country"
-                        value={country}
-                        onChange={handleCountryChange}
-                        className="py-2 px-4 border border-gray-300 rounded"
-                    >
-                        {Object.keys(countryCurrencyMap).map((countryName) => (
-                            <option key={countryName} value={countryName}>
-                                {countryName}
-                            </option>
-                        ))}
+                    {/* Dropdown to select country */}
+                    <div className="mb-4 text-center">
+                        <label htmlFor="country" className="mr-2">
+                            Select Country:
+                        </label>
+                        <select
+                            id="country"
+                            value={country}
+                            onChange={handleCountryChange}
+                            className="py-2 px-4 border border-gray-300 rounded"
+                        >
+                            {Object.keys(countryCurrencyMap).map((countryName) => (
+                                <option key={countryName} value={countryName}>
+                                    {countryName}
+                                </option>
+                            ))}
                     </select>
+                </div>
+
+                {/* Watchlist button */}
+                <div className="text-center mb-4">
+                    <button
+                        className="btn btn-primary py-2 px-4"
+                        onClick={() => setWatchlist([])} // Clear the watchlist
+                    >
+                        Clear Watchlist
+                    </button>
                 </div>
 
                 <table className="w-full border border-gray-300 shadow-lg text-center rounded-lg overflow-hidden">
@@ -134,6 +167,7 @@ const CoinGeckoTable = () => {
                             </th>
                             <th className="py-2 px-4 border-r border-gray-300">24h Change (%)</th>
                             <th className="py-2 px-4">Logo</th>
+                            <th className="py-2 px-4">Watchlist</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -176,10 +210,24 @@ const CoinGeckoTable = () => {
                                         className="w-8 h-8 mx-auto rounded-full"
                                     />
                                 </td>
+
+                                {/* Watchlist button */}
+                                <td className="py-2 px-4">
+    <button
+        onClick={() => {
+            isCoinInWatchlist(coin.id) ? removeFromWatchlist(coin.id) : addToWatchlist(coin.id);
+        }}
+        className="text-xl"
+        style={{ background: 'none', border: 'none' }}
+    >
+        {isCoinInWatchlist(coin.id) ? '★' : '☆'}
+    </button>
+</td>
                             </motion.tr>
                         ))}
                     </tbody>
                 </table>
+
                 <p className="text-center mt-4 text-gray-500 text-sm">
                     &copy; {new Date().getFullYear()} Financial Hub. All rights reserved.
                 </p>
