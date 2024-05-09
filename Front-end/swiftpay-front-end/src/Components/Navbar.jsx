@@ -50,7 +50,7 @@ const CustomNavbar = () => {
                     <div className="bg-gray-50 py-4">
                         <Link to='/About'><a href="#" className={`block py-2 px-4 text-sm text-blue-500 hover:bg-gray-100`}>About</a></Link>
                         <Link to='/Service'><a href="#" className={`block py-2 px-4 text-sm text-blue-500 hover:bg-gray-100`} >Services</a></Link>
-                        <a href="#" className={`block py-2 px-4 text-sm text-blue-500 hover:bg-gray-100 `} >Contact Us</a>
+                        <Link to='contact'><a href="#" className={`block py-2 px-4 text-sm text-blue-500 hover:bg-gray-100`} >Contact Us</a></Link>
                     </div>
                     <Link to="/signIn-signUp">
                         <div className="bg-gray-100 py-4 px-4 flex justify-center">

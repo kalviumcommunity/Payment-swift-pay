@@ -1,12 +1,14 @@
+/* Import Google font */
 @import url('https://fonts.googleapis.com/css?family=Quattrocento+Sans');
 
+/* Loading screen base styles */
 .loading {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background:white;
+    background: white;
     z-index: 9999;
 }
 
@@ -23,7 +25,7 @@
 
 .loading-image {
     position: absolute;
-    top: 20vw; /* Adjust the top position as needed */
+    top: 20vw;
     left: 50%;
     transform: translateX(-50%);
 }
@@ -48,7 +50,7 @@
 .loading-text span {
     display: inline-block;
     margin: 0 5px;
-    color:black;
+    color: black;
     font-family: 'Quattrocento Sans', sans-serif;
 }
 
@@ -89,16 +91,49 @@
     }
 }
 
-/* Media queries for tablet and mobile views */
-@media only screen and (max-width: 320px) {
+/* Media queries for responsive design */
+@media only screen and (max-width: 768px) {
+    /* Tablet view */
     .loading-text {
+        width: 80%;
+        height: auto;
+        line-height: normal;
         top: 40%;
-        transform: translate(10px, -20px);
+        left: 10%;
     }
-    .loading-image{
-        margin-top: 70%;
+    .loading-image {
+        top: 30vw;
+        left: 50%;
+        transform: translateX(-50%);
     }
 }
 
+@media only screen and (max-width: 480px) {
+    /* Mobile view */
+    .loading-text {
+        width: 90%;
+        height: auto;
+        line-height: normal;
+        top: 50%;
+        left: 5%;
+    }
+    .loading-image {
+        top: 40vw;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}
 
-
+/* Smaller screen sizes */
+@media only screen and (max-width: 320px) {
+    /* Adjustments for very small screens */
+    .loading-text {
+        top: 60%;
+        left: 5%;
+    }
+    .loading-image {
+        top: 50vw;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}

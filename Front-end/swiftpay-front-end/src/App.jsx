@@ -31,9 +31,18 @@ import NewsPage from './Components/NewsLanding.jsx';
 import Chat from './Components/Gemini.jsx';
 import FinanceBlogLandingPage from './Components/Financiallanding.jsx';
 import BudgetLanding from './Components/BudgetLanding.jsx';
+import SendWelcomeEmail from './Components/welcomeMessage.jsx'; 
+
+import { useState } from 'react';
+import WatchlistPage from './Components/Watchlist.jsx';
+import Loading from './Components/Loading.jsx';
 
 
 function App() {
+
+  const [coins, setCoins] = useState([]);
+  const [watchlist, setWatchlist] = useState([]);
+
   return (
     <BrowserRouter>
     <Routes>
@@ -53,7 +62,7 @@ function App() {
       <Route path='/Finance' element={<Layout><Finance/></Layout>}/>
       <Route path='/Stock' element={<Layout><Stock/></Layout>}/>
       <Route path='/Exchange' element={<ExchangeRateCalculator/>}/>
-      <Route path='/Coin' element={<CoinGeckoTable/>}/>
+      <Route path='/Coin' element={<CoinGeckoTable coins={coins}setCoins={setCoins}watchlist={watchlist}setWatchlist={setWatchlist}/>}  />
       <Route path='/Learning' element={<LearningLandingPage/>}/>
       <Route path='/Blog' element={<BlogApp/>}/>
       <Route path='/To' element={<TOdo/>}/>
@@ -62,8 +71,11 @@ function App() {
       <Route path='/Budget' element={<BudgetApp/>}/>
       <Route path='/FinancialLanding' element={<FinanceBlogLandingPage/>}/>
       <Route path='/Blanding' element={<BudgetLanding/>}/>
+      <Route path='/welcome' element={<SendWelcomeEmail/>}/>
+      <Route path='/WatchList' element={<WatchlistPage coins={coins} watchlist={watchlist} removeFromWatchlist={(coinId) =>setWatchlist((prevWatchlist) => prevWatchlist.filter((id) => id !== coinId))}/>} />
     </Routes>
     </BrowserRouter>
+   
     // <Chat/>
 
   );
