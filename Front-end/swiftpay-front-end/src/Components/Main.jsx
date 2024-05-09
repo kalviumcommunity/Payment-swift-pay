@@ -8,6 +8,7 @@ function Main() {
     <Link to='/Landing'>coinlanding</Link>
     <Link to='/FinancialLanding'>blog</Link>
     <Link to='/To'>Todo</Link>
+    <Link to='/Blanding'>Budget</Link>
     
     </div>
     
