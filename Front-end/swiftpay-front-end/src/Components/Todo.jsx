@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { collection, addDoc, query, where, onSnapshot, updateDoc, doc, deleteDoc, getDocs } from 'firebase/firestore';
+import {
+    collection,
+    addDoc,
+    query,
+    where,
+    onSnapshot,
+    updateDoc,
+    doc,
+    deleteDoc,
+    getDocs,
+} from 'firebase/firestore';
 import { db, auth } from '../../Firebase/Fire.config';
 import 'tailwindcss/tailwind.css';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
-import bull from "./../images/Bull.png"
+import bull from './../images/Bull.png';
+import sgMail from '@sendgrid/mail';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const TOdo = () => {
     const [task, setTask] = useState('');
@@ -15,9 +27,8 @@ const TOdo = () => {
     const [notes, setNotes] = useState('');
     const [recurrence, setRecurrence] = useState('');
     const [tasks, setTasks] = useState([]);
-    const [dueTodayTasks, setDueTodayTasks] = useState([]);
-    const [tasksOrder, setTasksOrder] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
+    const [pendingTasks, setPendingTasks] = useState([]);
 
     const navigate = useNavigate();
 
@@ -35,86 +46,78 @@ const TOdo = () => {
     // Fetch tasks from Firestore filtered by user's email
     useEffect(() => {
         if (currentUser) {
-            // Query tasks based on user's email
-            const q = query(
-                collection(db, 'tasks'),
-                where('userEmail', '==', currentUser.email)
-            );
-
-            const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const tasksCollection = collection(db, 'tasks');
+            const tasksQuery = query(tasksCollection, where('userEmail', '==', currentUser.email));
+            const unsubscribe = onSnapshot(tasksQuery, (querySnapshot) => {
                 const tasksList = [];
-                querySnapshot.forEach((doc) => {
-                    tasksList.push({ id: doc.id, ...doc.data() });
-                });
-                setTasks(tasksList);
-                setTasksOrder(tasksList.map(task => task.id));
+                const pendingTasksList = [];
 
-                // Check for tasks due today
-                const today = new Date().toISOString().split('T')[0];
-                const dueToday = tasksList.filter(task => task.dueDate === today && !task.completed);
-                setDueTodayTasks(dueToday);
+                querySnapshot.forEach((doc) => {
+                    const task = { id: doc.id, ...doc.data() };
+                    tasksList.push(task);
+
+                    if (isTaskOverdue(task)) {
+                        pendingTasksList.push(task);
+                    }
+                });
+
+                setTasks(tasksList);
+                setPendingTasks(pendingTasksList);
+
+                if (pendingTasksList.length > 0) {
+                    toast.warn(`You have ${pendingTasksList.length} pending task(s).`, {
+                        position: "top-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                    });
+                }
+
+                checkTasksDueToday(tasksList);
             });
+
             return () => unsubscribe();
         }
     }, [currentUser]);
 
-    // Request notification permission
-    useEffect(() => {
-        if ('Notification' in window) {
-            Notification.requestPermission();
+    // Check for tasks due today and send email notifications
+    const checkTasksDueToday = (tasksList) => {
+        const today = new Date().toISOString().split('T')[0];
+        const dueTodayTasks = tasksList.filter(task => task.dueDate === today && !task.completed);
+        if (dueTodayTasks.length > 0) {
+            sendEmailNotification(dueTodayTasks);
         }
-    }, []);
+    };
 
-    // Show notifications for tasks due today
-    useEffect(() => {
-        if (dueTodayTasks.length > 0 && Notification.permission === 'granted') {
-            dueTodayTasks.forEach(task => {
-                new Notification(`Task due today: ${task.task}`);
-            });
-        }
-    }, [dueTodayTasks]);
+    // Send email notification for tasks due today
+    const sendEmailNotification = async (tasks) => {
+        const user = currentUser;
+        const email = user.email;
 
-    // Handle task recurrence
-    const handleTaskRecurrence = async () => {
-        const tasksQuery = query(collection(db, 'tasks'), where('userEmail', '==', currentUser.email));
-        const tasksSnapshot = await getDocs(tasksQuery);
-        const today = new Date();
+        tasks.forEach(async (task) => {
+            const msg = {
+                to: email,
+                from: 'your-email@example.com', // Use your email address here
+                subject: 'Task Due Today',
+                text: `Your task "${task.task}" is due today. Please complete it.`,
+            };
 
-        tasksSnapshot.forEach(async (taskDoc) => {
-            const task = taskDoc.data();
-
-            // Calculate the next recurrence date based on the task recurrence setting
-            let nextDueDate = new Date(task.dueDate);
-            if (task.recurrence === 'daily') {
-                nextDueDate.setDate(nextDueDate.getDate() + 1);
-            } else if (task.recurrence === 'weekly') {
-                nextDueDate.setDate(nextDueDate.getDate() + 7);
-            } else if (task.recurrence === 'monthly') {
-                nextDueDate.setMonth(nextDueDate.getMonth() + 1);
-            }
-
-            // Check if the task should recur today
-            if (task.recurrence && nextDueDate <= today) {
-                // Create a new task with the same properties as the original task
-                const newTask = {
-                    ...task,
-                    dueDate: nextDueDate.toISOString().split('T')[0],
-                };
-                delete newTask.id;
-
-                await addDoc(collection(db, 'tasks'), newTask);
-
-                // Update the last due date of the original task
-                // You could add a field like 'lastDueDate' to track the last due date of the task
+            try {
+                await sgMail.send(msg);
+                console.log(`Email notification sent for task: ${task.task}`);
+            } catch (error) {
+                console.error('Error sending email notification:', error);
             }
         });
     };
 
-    // Add a new task to Firestore with the user's email or username
+    // Add a new task
     const addTask = async (e) => {
         e.preventDefault();
         if (task && currentUser) {
-            const docRef = await addDoc(collection(db, 'tasks'), {
+            const newTask = {
                 task,
                 priority,
                 dueDate,
@@ -124,68 +127,113 @@ const TOdo = () => {
                 completed: false,
                 userEmail: currentUser.email,
                 username: currentUser.displayName,
-            });
-            // Reset input fields
-            setTask('');
-            setPriority('Medium');
-            setDueDate('');
-            setCategory('');
-            setNotes('');
-            setRecurrence('');
-            setTasksOrder([...tasksOrder, docRef.id]);
+            };
+
+            try {
+                const docRef = await addDoc(collection(db, 'tasks'), newTask);
+                setTask('');
+                setPriority('Medium');
+                setDueDate('');
+                setCategory('');
+                setNotes('');
+                setRecurrence('');
+            } catch (error) {
+                console.error('Error adding task:', error);
+            }
         }
     };
 
     // Update a task
     const updateTask = async (taskId, updatedData) => {
         const taskDoc = doc(db, 'tasks', taskId);
-        await updateDoc(taskDoc, updatedData);
+        try {
+            await updateDoc(taskDoc, updatedData);
+        } catch (error) {
+            console.error('Error updating task:', error);
+        }
     };
 
     // Delete a task
     const deleteTask = async (taskId) => {
         const taskDoc = doc(db, 'tasks', taskId);
-        await deleteDoc(taskDoc);
-        setTasksOrder(tasksOrder.filter(id => id !== taskId));
+        try {
+            await deleteDoc(taskDoc);
+        } catch (error) {
+            console.error('Error deleting task:', error);
+        }
     };
 
-    // Handle drag and drop reordering
-    const handleOnDragEnd = (result) => {
-        if (!result.destination) return;
-
-        const reorderedTasks = Array.from(tasksOrder);
-        const [movedTask] = reorderedTasks.splice(result.source.index, 1);
-        reorderedTasks.splice(result.destination.index, 0, movedTask);
-
-        setTasksOrder(reorderedTasks);
+    // Check if a task is overdue
+    const isTaskOverdue = (task) => {
+        const today = new Date().toISOString().split('T')[0];
+        return !task.completed && task.dueDate < today;
     };
 
-    // Schedule the function to run daily at midnight to handle task recurrence
+    // Handle task recurrence at midnight
     useEffect(() => {
-        const checkRecurrenceInterval = setInterval(() => {
+        const handleMidnight = () => {
             const now = new Date();
-            // Run the recurrence check every day at midnight
             if (now.getHours() === 0 && now.getMinutes() === 0) {
                 handleTaskRecurrence();
             }
-        }, 60000); // Check every minute
+        };
 
-        return () => clearInterval(checkRecurrenceInterval);
+        const intervalId = setInterval(handleMidnight, 60 * 1000);
+
+        return () => clearInterval(intervalId);
     }, []);
 
+    // Handle task recurrence
+    const handleTaskRecurrence = async () => {
+        const tasksQuery = query(collection(db, 'tasks'), where('userEmail', '==', currentUser.email));
+        const tasksSnapshot = await getDocs(tasksQuery);
+        const today = new Date();
+
+        tasksSnapshot.forEach(async (taskDoc) => {
+            const task = taskDoc.data();
+            const nextDueDate = calculateNextRecurrenceDate(task);
+
+            if (task.recurrence && nextDueDate <= today) {
+                const newTask = { ...task, dueDate: nextDueDate.toISOString().split('T')[0] };
+                delete newTask.id;
+
+                try {
+                    await addDoc(collection(db, 'tasks'), newTask);
+                } catch (error) {
+                    console.error('Error adding recurrent task:', error);
+                }
+            }
+        });
+    };
+
+    // Calculate the next recurrence date
+    const calculateNextRecurrenceDate = (task) => {
+        let nextDueDate = new Date(task.dueDate);
+        switch (task.recurrence) {
+            case 'daily':
+                nextDueDate.setDate(nextDueDate.getDate() + 1);
+                break;
+            case 'weekly':
+                nextDueDate.setDate(nextDueDate.getDate() + 7);
+                break;
+            case 'monthly':
+                nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+                break;
+            default:
+                nextDueDate = null;
+        }
+        return nextDueDate;
+    };
+
     return (
-        <div className="mx-auto py-10 px-4">
-            <img className='w-10 h-10 ml-9'  src={bull} alt="" />
+        <div className=" mx-auto py-10 px-4">
+            <img className="w-10 h-10 ml-9" src={bull} alt="" />
             <h1 className="text-4xl font-bold text-center mb-8 text-blue-500">Fiscal Focus</h1>
 
-            {/* Notification for tasks due today */}
-            {dueTodayTasks.length > 0 && (
-                <div className="alert alert-warning mb-6">
-                    <span>You have {dueTodayTasks.length} task(s) due today!</span>
-                </div>
-            )}
+            {/* React Toastify container */}
+            <ToastContainer />
 
-            {/* Form to add a new task */}
+            {/* Task addition form */}
             <form onSubmit={addTask} className="w-full max-w-md mx-auto mb-6 p-4 rounded-lg bg-white shadow-lg">
                 <div className="flex flex-col space-y-4">
                     <input
@@ -202,9 +250,9 @@ const TOdo = () => {
                             onChange={(e) => setPriority(e.target.value)}
                             className="select select-primary w-full"
                         >
-                            <option>High</option>
-                            <option>Medium</option>
-                            <option>Low</option>
+                            <option value="High">High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
                         </select>
 
                         <input
@@ -245,59 +293,52 @@ const TOdo = () => {
                 </div>
             </form>
 
-            {/* Task list with drag-and-drop functionality */}
+            {/* Task list */}
             <div className="w-full max-w-md mx-auto">
-                <DragDropContext onDragEnd={handleOnDragEnd}>
-                    <Droppable droppableId="tasks">
-                        {(provided) => (
-                            <div {...provided.droppableProps} ref={provided.innerRef}>
-                                {tasksOrder.map((taskId, index) => {
-                                    const task = tasks.find(t => t.id === taskId);
-                                    return (
-                                        <Draggable key={task.id} draggableId={task.id} index={index}>
-                                            {(provided) => (
-                                                <div
-                                                    className={`card card-bordered shadow-md mb-4 p-4 rounded-lg ${task.priority === 'High' ? 'border-red-500' : task.priority === 'Medium' ? 'border-yellow-500' : 'border-green-500'}`}
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    {...provided.dragHandleProps}
-                                                >
-                                                    <div className="flex justify-between items-center mb-2">
-                                                        <div className="flex items-center">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={task.completed}
-                                                                onChange={() => updateTask(task.id, { completed: !task.completed })}
-                                                                className="checkbox checkbox-primary mr-2"
-                                                            />
-                                                            <p className={`font-medium ${task.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
-                                                                {task.task}
-                                                            </p>
-                                                        </div>
-                                                        <button
-                                                            className="btn btn-danger btn-sm"
-                                                            onClick={() => deleteTask(task.id)}
-                                                        >
-                                                            Delete
-                                                        </button>
-                                                    </div>
-                                                    <div className="flex flex-col space-y-1">
-                                                        <p className="text-sm text-gray-600">Priority: {task.priority}</p>
-                                                        <p className="text-sm text-gray-600">Due Date: {task.dueDate}</p>
-                                                        <p className="text-sm text-gray-600">Category: {task.category}</p>
-                                                        <p className="text-sm text-gray-600">Notes: {task.notes}</p>
-                                                        <p className="text-sm text-gray-600">Recurrence: {task.recurrence || 'None'}</p>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </Draggable>
-                                    );
-                                })}
-                                {provided.placeholder}
+                {tasks.map(task => {
+                    const overdue = isTaskOverdue(task);
+                    return (
+                        <div
+                            key={task.id}
+                            className={`card card-bordered shadow-md mb-4 p-4 rounded-lg ${
+                                task.priority === 'High' ? 'border-red-500' :
+                                task.priority === 'Medium' ? 'border-yellow-500' :
+                                'border-green-500'
+                            } ${overdue ? 'bg-red-300' : ''}`}
+                        >
+                            <div className="flex justify-between items-center mb-2">
+                                <div className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={task.completed}
+                                        onChange={() => updateTask(task.id, { completed: !task.completed })}
+                                        className="checkbox checkbox-primary mr-2"
+                                    />
+                                    <p className={`font-medium ${task.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
+                                        {task.task}
+                                    </p>
+                                </div>
+                                <button
+                                    className="btn btn-danger btn-sm"
+                                    onClick={() => deleteTask(task.id)}
+                                >
+                                    Delete
+                                </button>
                             </div>
-                        )}
-                    </Droppable>
-                </DragDropContext>
+
+                            {overdue && (
+                                <div className="text-xs text-red-600 font-bold mb-2">Pending</div>
+                            )}
+                            <div className="flex flex-col space-y-1">
+                                <p className="text-sm text-gray-600">Priority: {task.priority}</p>
+                                <p className="text-sm text-gray-600">Due Date: {task.dueDate}</p>
+                                <p className="text-sm text-gray-600">Category: {task.category}</p>
+                                <p className="text-sm text-gray-600">Notes: {task.notes}</p>
+                                <p className="text-sm text-gray-600">Recurrence: {task.recurrence || 'None'}</p>
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

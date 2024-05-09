@@ -73,7 +73,7 @@ const NewsPage = () => {
     {/* Header text */}
     <motion.h1
         className="text-5xl font-bold text-blue-500"
-        initial={{ opacity: 5, scale: 1.8 }}
+        initial={{ opacity: 5, scale: 0.5 }}
         animate={{ opacity: 5, scale: 1 }}
         transition={{ duration: 0.9 }}
     >
