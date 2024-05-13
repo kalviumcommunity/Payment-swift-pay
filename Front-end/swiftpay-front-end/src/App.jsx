@@ -64,7 +64,7 @@ function App() {
       <Route path='/Exchange' element={<ExchangeRateCalculator/>}/>
       <Route path='/Coin' element={<CoinGeckoTable coins={coins}setCoins={setCoins}watchlist={watchlist}setWatchlist={setWatchlist}/>}  />
       <Route path='/Learning' element={<LearningLandingPage/>}/>
-      <Route path='/Blog' element={<BlogApp/>}/>
+      <Route path='/Blog' element={<Layout><BlogApp/></Layout>}/>
       <Route path='/To' element={<TOdo/>}/>
       <Route path='/News' element={<NewsPage/>}/>
       <Route path='/Landing' element={<LandingPage/>}/>
@@ -73,11 +73,9 @@ function App() {
       <Route path='/Blanding' element={<BudgetLanding/>}/>
       <Route path='/welcome' element={<SendWelcomeEmail/>}/>
       <Route path='/WatchList' element={<WatchlistPage coins={coins} watchlist={watchlist} removeFromWatchlist={(coinId) =>setWatchlist((prevWatchlist) => prevWatchlist.filter((id) => id !== coinId))}/>} />
+      <Route path='/gemini' element={<Chat/>}/>
     </Routes>
     </BrowserRouter>
-   
-    // <Chat/>
-
   );
  
 }

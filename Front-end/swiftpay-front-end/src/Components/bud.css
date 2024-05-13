@@ -1,0 +1,9 @@
+.court {
+    width: 400px; /* Adjust according to your preference */
+    height: 400px; /* Adjust according to your preference */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  

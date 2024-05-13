@@ -9,8 +9,15 @@ import {
   doc,
   onSnapshot,
   deleteDoc,
+  getDoc,
+  query,
+  where,
+  getDocs,
+  setDoc,
+  runTransaction
 } from 'firebase/firestore' ;
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { toast } from 'react-toastify';
 console.log(auth)
 
 const BlogApp = () => {
@@ -25,6 +32,7 @@ const BlogApp = () => {
   const [editingPost, setEditingPost] = useState(null);
   const [editingComment, setEditingComment] = useState(null);
   const [subtopics, setSubtopics] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
   
   const handleSubtopicChange = (index, field, value) => {
@@ -143,39 +151,152 @@ const BlogApp = () => {
 
   // Handle editing a post
   const handleEditPost = (post) => {
-    setNewPostTitle(post.title);
-    setNewPostContent(post.content);
-    setNewPostImage(post.imageUrl);
-    setEditingPost(post);
-    navigateToCreatePostPage();
+    // Check if the current user is the author of the post
+    if (currentUser && currentUser.email === post.authorEmail) {
+      // If the user is the author, allow editing
+      setNewPostTitle(post.title);
+      setNewPostContent(post.content);
+      setNewPostImage(post.imageUrl);
+      setEditingPost(post);
+      navigateToCreatePostPage();
+    } else {
+      // If the user is not the author, display an error message
+      toast.warning("You are not authorized to edit this post.");
+    }
   };
+  
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+      } else {
+        setCurrentUser(null);
+      }
+    });
+    return unsubscribe;
+  }, []);
 
   // Handle like and dislike updates
   const handleLike = debounce(async (postId) => {
+    const user = auth.currentUser;
+    if (!user) {
+      console.log("User must be logged in to like a post");
+      return;
+    }
+  
+    const interactionsDoc = doc(db, 'postInteractions', postId);
+    const likesCollection = collection(interactionsDoc, 'likes');
+  
+    const userIdentifier = user.displayName || user.email;
+  
+    // Check if the user has already liked the post
+    const likeQuery = query(likesCollection, where('user', '==', userIdentifier));
+    const likeSnapshot = await getDocs(likeQuery);
+  
+    if (!likeSnapshot.empty) {
+      // User has already liked the post, so remove the like
+      const likeDoc = likeSnapshot.docs[0];
+      await deleteDoc(likeDoc.ref);
+    } else {
+      // User has not liked the post, so add a new like
+      await addDoc(likesCollection, {
+        user: userIdentifier,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  
+    // Update the likes count in the posts collection
     const postDoc = doc(db, 'posts', postId);
-    const updatedPost = posts.find((p) => p.id === postId);
-    updatedPost.likes += 1;
-    await updateDoc(postDoc, { likes: updatedPost.likes });
-    setPosts(posts.map((p) => (p.id === postId ? updatedPost : p)));
-}, 300); // 300 milliseconds debounce delay
+    const postSnapshot = await getDoc(postDoc);
+    if (postSnapshot.exists()) {
+      const postData = postSnapshot.data();
+      const likesCount = likeSnapshot.empty ? postData.likes + 1 : postData.likes - 1;
+      await updateDoc(postDoc, { likes: likesCount });
+      // Update the local state
+      setPosts(posts.map((p) => (p.id === postId ? { ...p, likes: likesCount } : p)));
+    }
+  }, 300);
+  
+  const handleDislike = debounce(async (postId) => {
+    const user = auth.currentUser;
+    if (!user) {
+      console.log("User must be logged in to dislike a post");
+      return;
+    }
+  
+    const interactionsDoc = doc(db, 'postInteractions', postId);
+    const dislikesCollection = collection(interactionsDoc, 'dislikes');
+  
+    const userIdentifier = user.displayName || user.email;
+  
+    // Check if the user has already disliked the post
+    const dislikeQuery = query(dislikesCollection, where('user', '==', userIdentifier));
+    const dislikeSnapshot = await getDocs(dislikeQuery);
+  
+    if (!dislikeSnapshot.empty) {
+      // User has already disliked the post, so remove the dislike
+      const dislikeDoc = dislikeSnapshot.docs[0];
+      await deleteDoc(dislikeDoc.ref);
+    } else {
+      // User has not disliked the post, so add a new dislike
+      await addDoc(dislikesCollection, {
+        user: userIdentifier,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  
+    // Update the dislikes count in the posts collection
+    const postDoc = doc(db, 'posts', postId);
+    const postSnapshot = await getDoc(postDoc);
+    if (postSnapshot.exists()) {
+      const postData = postSnapshot.data();
+      const dislikesCount = dislikeSnapshot.empty ? postData.dislikes + 1 : postData.dislikes - 1;
+      await updateDoc(postDoc, { dislikes: dislikesCount });
+      // Update the local state
+      setPosts(posts.map((p) => (p.id === postId ? { ...p, dislikes: dislikesCount } : p)));
+    }
+  }, 300);
+  
+  
 
 
-  const handleDislike = async (postId) => {
-    const postDoc = doc(db, 'posts', postId);
-    const updatedPost = posts.find((p) => p.id === postId);
-    updatedPost.dislikes += 1;
-    await updateDoc(postDoc, { dislikes: updatedPost.dislikes });
-    setPosts(posts.map((p) => (p.id === postId ? updatedPost : p)));
-  };
 
-  // Increment views count
-  const incrementViews = async (postId) => {
+// Increment views count
+const incrementViews = async (postId) => {
+  const user = auth.currentUser;
+  if (!user) {
+    console.log("User must be logged in to increment views.");
+    return;
+  }
+
+  // Use username or email for authentication
+  const userIdentifier = user.displayName || user.email;
+
+  const viewedPostsCollection = collection(db, 'viewedPosts');
+  const viewedPostDoc = doc(viewedPostsCollection, `${userIdentifier}_${postId}`);
+
+  const viewedPostSnapshot = await getDoc(viewedPostDoc);
+
+  if (!viewedPostSnapshot.exists()) {
+    // If the user has not viewed the post yet, increment views
     const postDoc = doc(db, 'posts', postId);
-    const post = posts.find((p) => p.id === postId);
-    post.views += 1;
-    await updateDoc(postDoc, { views: post.views });
-    setPosts(posts.map((p) => (p.id === postId ? post : p)));
-  };
+    const postSnapshot = await getDoc(postDoc);
+
+    if (postSnapshot.exists()) {
+      const postData = postSnapshot.data();
+      const updatedViews = postData.views + 1;
+      await updateDoc(postDoc, { views: updatedViews });
+
+      // Add the post to the viewedPosts collection to track that the user has viewed it
+      await setDoc(viewedPostDoc, { viewed: true });
+
+      // Update the local state
+      setPosts(posts.map((p) => (p.id === postId ? { ...p, views: updatedViews } : p)));
+    }
+  }
+};
+
 
   // Handle comment submission or editing
   const handleCommentSubmit = async (e) => {
@@ -215,14 +336,44 @@ const BlogApp = () => {
 
   // Handle post deletion
   const handleDeletePost = async (postId) => {
+    const user = auth.currentUser;
+    if (!user) {
+      console.log("User must be logged in to delete a post.");
+      return;
+    }
+  
+    // Check if the logged-in user's username or email matches the author's username or email of the post
+    const postToDelete = posts.find((post) => post.id === postId);
+    if (!postToDelete) {
+      console.log("Post not found.");
+      return;
+    }
+  
+    if (postToDelete.authorUsername !== user.displayName && postToDelete.authorEmail !== user.email) {
+      console.log("Only the author of the post can delete it.");
+      return;
+    }
+  
+    // If the logged-in user is the author, proceed with deletion
     const postDoc = doc(db, 'posts', postId);
     await deleteDoc(postDoc);
-    setPosts(posts.filter((post) => post.id !== postId));
+  
+    // Fetch the updated list of posts from the database
+    const updatedPostsCollection = collection(db, 'posts');
+    const updatedPostsSnapshot = await getDocs(updatedPostsCollection);
+    const updatedPostsList = updatedPostsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setPosts(updatedPostsList);
+  
     if (currentPost && currentPost.id === postId) {
       navigateToHomePage();
     }
   };
-
+  
+  
+  
   // Handle post sharing
   const handleShare = (post) => {
     if (navigator.share) {
