@@ -1,59 +1,148 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
+import Prism from "prismjs";
+import "prismjs/themes/prism.css"; // Import PrismJS CSS
+import CodeResponse from "./CodeResponse"; 
 
-const Chat = () => {
-    const [messages, setMessages] = useState([]);
-    const [userInput, setUserInput] = useState('');
-    const chatContainerRef = useRef(null);
 
-    const handleInputChange = (event) => {
-        setUserInput(event.target.value);
-    };
+const Gemini = () => {
+  // Define state and references
+  const [value, setValue] = useState("");
+  const [error, setError] = useState("");
+  const [chatHistory, setChatHistory] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const textareaRef = useRef(null);
 
-    const handleSendMessage = async () => {
-        try {
-            if (!userInput.trim()) return;
-    
-            // Add user's message to the messages array
-            const newMessage = { role: 'user', content: userInput.trim() };
-            setMessages([...messages, newMessage]);
-    
-            // Send the user message to the server
-            const response = await fetch('http://localhost:3001/api/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ messages: [newMessage] }),
-            });
-    
-            if (response.ok) {
-                // Process streaming response...
-            } else {
-                console.error('Failed to fetch AI response:', response.statusText);
-            }
-    
-            // Clear user input
-            setUserInput('');
-        } catch (error) {
-            console.error('Error during fetch:', error);
-        }
-    };
-    
-    return (
-        <div>
-            <div id="chat-container" ref={chatContainerRef} style={{ height: '500px', overflowY: 'auto', padding: '10px', border: '1px solid #ccc' }}>
-                {messages.map((message, index) => (
-                    <div key={index} className={message.role === 'user' ? 'user-message' : 'ai-message'} style={{ color: message.role === 'user' ? 'blue' : 'green' }}>
-                        {message.content}
-                    </div>
-                ))}
-            </div>
-            <div style={{ display: 'flex', marginTop: '10px' }}>
-                <input type="text" value={userInput} onChange={handleInputChange} style={{ flexGrow: 1, marginRight: '10px' }} />
-                <button onClick={handleSendMessage}>Send</button>
-            </div>
+  // Function to auto-resize the textarea based on content
+  const autoResizeInput = () => {
+    textareaRef.current.style.height = "auto";
+    textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+  };
+
+  // Fetch response from the server
+  const fetchResponse = async () => {
+    if (!value.trim()) {
+      setError("Please enter a question.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:3001/gemini", {
+        method: "POST",
+        body: JSON.stringify({ history: chatHistory, message: value }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await response.text();
+
+      // Format the response from the server
+      const formattedResponse = data.startsWith("**")
+        ? data
+        : `**Bot:** ${data}`;
+      
+      // Format the user's message for display
+      const formattedUserMessage = `**You:** ${value}`;
+
+      // Update chat history with user's message and bot's response
+      setChatHistory((prevChatHistory) => [
+        ...prevChatHistory,
+        { role: "user", parts: formattedUserMessage },
+        { role: "model", parts: formattedResponse }
+      ]);
+
+      // Clear input field and reset loading state
+      setValue("");
+      setIsLoading(false);
+      autoResizeInput();
+    } catch (error) {
+      console.error("Error fetching response:", error);
+      setError("Something went wrong. Please try again later.");
+      setIsLoading(false);
+    }
+  };
+
+  // Function to clear chat history and input field
+  const clearHistory = () => {
+    setChatHistory([]);
+    setValue("");
+    setError("");
+    textareaRef.current.style.height = "auto";
+  };
+
+  // Effect to highlight code blocks using PrismJS when chat history updates
+  useEffect(() => {
+    Prism.highlightAll();
+  }, [chatHistory]);
+
+  // Render the Gemini chatbot component
+  return (
+    <div className="max-w-2xl mx-auto py-8">
+      {/* Header */}
+      <h1 className="text-3xl font-bold text-blue-500 mb-4">Gemini Chatbot</h1>
+
+      {/* Textarea and Action Buttons */}
+      <div className="mb-4">
+        <textarea
+          ref={textareaRef}
+          className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          value={value}
+          placeholder="Type your question here..."
+          onChange={(e) => {
+            setValue(e.target.value);
+            autoResizeInput();
+          }}
+        />
+        <div className="flex justify-end space-x-4 mt-2">
+          <button
+            className={`px-4 py-2 rounded-lg shadow ${
+              isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600"
+            } text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            onClick={fetchResponse}
+            disabled={isLoading}
+          >
+            {isLoading ? "Thinking..." : "Ask"}
+          </button>
+          {error && (
+            <button
+              className="px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+              onClick={clearHistory}
+            >
+              Clear Chat
+            </button>
+          )}
         </div>
-    );
+      </div>
+
+      {/* Error message */}
+      {error && (
+        <div className="mb-4 text-red-600 font-semibold">
+          {error}
+        </div>
+      )}
+
+      {/* Chat history */}
+      <div className="border-t border-gray-300 pt-4">
+        {chatHistory.map((chatItem, index) => (
+          <div key={index} className="mb-4 p-4 bg-gray-100 rounded-lg">
+            {chatItem.role === "user" ? (
+              <div className="text-blue-600">
+                <ReactMarkdown>{chatItem.parts}</ReactMarkdown>
+              </div>
+            ) : chatItem.parts.startsWith("```") ? (
+              <CodeResponse code={chatItem.parts} />
+            ) : (
+              <div className="text-gray-800">
+                <ReactMarkdown>{chatItem.parts}</ReactMarkdown>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
-export default Chat;
+export default Gemini;
