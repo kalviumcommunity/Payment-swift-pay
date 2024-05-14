@@ -36,6 +36,8 @@ import SendWelcomeEmail from './Components/welcomeMessage.jsx';
 import { useState } from 'react';
 import WatchlistPage from './Components/Watchlist.jsx';
 import Loading from './Components/Loading.jsx';
+import HomePage from './Components/EductionalHome.jsx';
+import FeedbackReview from './Components/FeedbackReview.jsx';
 
 
 function App() {
@@ -74,6 +76,8 @@ function App() {
       <Route path='/welcome' element={<SendWelcomeEmail/>}/>
       <Route path='/WatchList' element={<WatchlistPage coins={coins} watchlist={watchlist} removeFromWatchlist={(coinId) =>setWatchlist((prevWatchlist) => prevWatchlist.filter((id) => id !== coinId))}/>} />
       <Route path='/gemini' element={<Chat/>}/>
+      <Route path='/EductionalHome' element={<HomePage/>}/>
+      <Route path='/customer' element={<FeedbackReview/>}/>
     </Routes>
     </BrowserRouter>
   );

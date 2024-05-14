@@ -20,7 +20,7 @@ function Footer() {
                 <div className="footer-section">
                     <h3  className='footer_titles'>Quick Links</h3>
                     <ul className="footer-links">
-                        <li><Link className='footer_navigation' to="/Feedback">Feedback</Link></li>
+                        <li><Link className='footer_navigation' to="/customer">Feedback</Link></li>
                         <li><Link className='footer_navigation' to="/conditions">Terms & condition</Link></li>
                         <li><Link className='footer_navigation' to="/privacy">Privacy policy</Link></li>
                     </ul>
