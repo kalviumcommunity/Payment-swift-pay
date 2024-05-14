@@ -30,7 +30,7 @@ const Gemini = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:3001/gemini", {
+      const response = await fetch("https://payment-swift-pay.onrender.com/gemini", {
         method: "POST",
         body: JSON.stringify({ history: chatHistory, message: value }),
         headers: { "Content-Type": "application/json" },
