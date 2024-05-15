@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { collection, addDoc, onSnapshot, query, where, doc, deleteDoc, updateDoc, setDoc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query, where, doc, deleteDoc, updateDoc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../Firebase/Fire.config';
 import bull from "./../images/Bull.png";
-
 
 const BudgetApp = () => {
   const [budget, setBudget] = useState(0);
@@ -16,7 +15,7 @@ const BudgetApp = () => {
   const [filteredCategory, setFilteredCategory] = useState('All'); // Default filter option
   const [tipQuestion, setTipQuestion] = useState('');
   const [submittedQuestion, setSubmittedQuestion] = useState(false);
-
+  
   useEffect(() => {
     const unsubscribeAuth = auth.onAuthStateChanged((user) => {
       if (user) {
@@ -91,11 +90,13 @@ const BudgetApp = () => {
         console.log('Expense updated successfully!');
         setCurrentExpenseId(null);
       } else {
+        const currentDate = new Date(); // Include the current date/time
         const newExpense = {
           title: productTitle,
           cost,
           userEmail,
           category: selectedCategory,
+          date: currentDate, // Include the current date/time
         };
 
         await addDoc(collection(db, 'expenses'), newExpense);
@@ -209,26 +210,6 @@ const BudgetApp = () => {
           </button>
         </div>
 
-        <div className="tip-question-container bg-white shadow-md p-4 rounded-lg mt-4">
-          <h3 className="text-xl font-bold text-gray-800">Ask for Tips</h3>
-          <textarea
-            value={tipQuestion}
-            onChange={(e) => setTipQuestion(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded mt-2 focus:border-blue-500"
-            placeholder="Enter your question or request for tips"
-            rows={4}
-          />
-          <button
-            className="w-full bg-blue-500 text-white py-2 mt-2 rounded hover:bg-blue-700"
-            onClick={handleSubmitTipQuestion}
-          >
-            Submit
-          </button>
-          {submittedQuestion && (
-            <p className="text-green-500 mt-2">Your question has been submitted. Check back later for tips!</p>
-          )}
-        </div>
-
         <div className="output-container flex justify-between mt-6 p-4 bg-blue-500 rounded-lg shadow-md">
           <div>
             <p className="text-white font-medium">Total Budget</p>
@@ -273,6 +254,10 @@ const BudgetApp = () => {
                   <div>
                     <span>{expense.title}</span>
                     <p className="text-gray-500 text-sm mt-1">{expense.category}</p>
+                    {/* Add date here */}
+                    {expense.date && expense.date.seconds && (
+                      <p className="text-gray-500 text-sm mt-1">{new Date(expense.date.seconds * 1000).toLocaleDateString()}</p>
+                    )}
                   </div>
                   <span>{expense.cost.toFixed(2)}</span>
                   <div className="flex space-x-2">
@@ -295,7 +280,6 @@ const BudgetApp = () => {
         </div>
       </div>
       <div className="flex justify-center mt-8">
-       
       </div>
     </div>
   );

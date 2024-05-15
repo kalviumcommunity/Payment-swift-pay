@@ -1,69 +1,149 @@
 import React, { useState } from 'react';
-import { addDoc, collection } from "firebase/firestore";
+import './Feedback.css'; // Import your modified CSS file
 import { db } from '../../Firebase/Fire.config';
-import heroImage from './../images/Feedback.jpg'; // Import your hero image
+import { addDoc, collection } from 'firebase/firestore';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import emailIcon from "./../images/Email.png";
+import phoneIcon from "./../images/telephone-call-symbol-smartphone-ringing-phone-removebg-preview.png";
+import locationIcon from './../images/location.png';
+import { useNavigate } from "react-router-dom";
+import Dots from "./../images/Dots2.jpg";
 
+const Feedback = () => {
+  const [focus, setFocus] = useState({
+    userName: false,
+    userEmail: false,
+    userPhone: false,
+    userMessage: false
+  });
 
-function Feedback() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [text, setText] = useState("");
-  const navigate =useNavigate();
+  const handleFocus = (field) => {
+    setFocus({ ...focus, [field]: true });
+  };
 
-  const handleAdd = async () => {
-    // Check if any of the input fields are empty
-    if (!name || !email || !text) {
-      toast.error("Please fill in all fields before submitting.");
-      return;
-    }
-  
-    try {
-      const docRef = await addDoc(collection(db, "feedback"), {
-        name: name,
-        email: email,
-        message: text
-      });
-      console.log("Document written with ID: ", docRef.id);
-      toast.success("Feedback submitted successfully!");
-      setName("");
-      setEmail("");
-      setText("");
-      navigate('/');
-    } catch (error) {
-      console.error("Error adding document: ", error);
-      toast.error("An error occurred. Please try again later.");
+  const handleBlur = (field, value) => {
+    if (value === '') {
+      setFocus({ ...focus, [field]: false });
     }
   };
-  
+
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const userName = formData.get('userName');
+    const userEmail = formData.get('userEmail');
+    const userPhone = formData.get('userPhone');
+    const userMessage = formData.get('userMessage');
+
+    if (!userName || !userEmail || !userPhone || !userMessage) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    const data = { userName, userEmail, userPhone, userMessage };
+    try {
+      const docRef = await addDoc(collection(db, 'feedback'), data);
+      console.log('Document written with ID: ', docRef.id);
+      form.reset();
+      toast.success('Thank you for the feedback');
+      navigate('/');
+    } catch (error) {
+      console.error('Error adding document: ', error);
+    }
+  };
 
   return (
-    <div className="relative bg-gray-900 h-screen overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <img className="w-full h-full object-cover opacity-50" src={heroImage} alt="Hero Banner" />
-      </div>
-      <div className="relative z-10 flex flex-col justify-center items-center h-full py-12">
-        <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">Financial hub</h1>
-        <p className="text-lg md:text-xl text-white mb-8">Leave your feedback below</p>
-        <div className="bg-white bg-opacity-25 backdrop-filter backdrop-blur-md p-8 rounded-lg shadow-lg">
-          <label className="block mb-4">
-            <span className="text-white">Name:</span>
-            <input type="text" className="mt-1 block w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-500 px-4 py-2" value={name} onChange={(e) => setName(e.target.value)} />
-          </label>
-          <label className="block mb-4">
-            <span className="text-white">Email:</span>
-            <input type="email" className="mt-1 block w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-500 px-5 py-2" value={email} onChange={(e) => setEmail(e.target.value)} />
-          </label>
-          <label className="block mb-4">
-            <span className="text-white">Message:</span>
-            <textarea className="mt-1 block w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-500 px-4 py-2" value={text} onChange={(e) => setText(e.target.value)} />
-          </label>
-          <button className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg" onClick={handleAdd}>Submit Feedback</button>
+    <div className="feedback-container">
+      <span className="feedback-big-circle"></span>
+      <img src={Dots} className="feedback-square" alt="background decoration" />
+      <div className="feedback-form-container">
+        <div className="feedback-contact-info">
+          <h3 className="feedback-title">Give us your feedback</h3>
+          <p className="feedback-text">
+            Thank you for sharing your thoughts with us.
+            Your feedback is invaluable to us as we continue to grow and improve.<br />
+          </p>
+          <div className="feedback-info">
+            <div className="feedback-information">
+              <img src={locationIcon} className="feedback-icon" alt="location" />
+              <p>92 Cherry Drive Uniondale, NY 11553</p>
+            </div>
+            <div className="feedback-information">
+              <img src={emailIcon} className="feedback-icon" alt="email" />
+              <p>Financial@hub.com</p>
+            </div>
+            <div className="feedback-information">
+              <img src={phoneIcon} className="feedback-icon" alt="phone" />
+              <p>123-456-7898</p>
+            </div>
+          </div>
+          <div className="feedback-social-media">
+            <p>Connect with us :</p>
+            <div className="feedback-social-icons">
+              <a href="#"><i className="fab fa-facebook-f"></i></a>
+              <a href="#"><i className="fab fa-twitter"></i></a>
+              <a href="#"><i className="fab fa-instagram"></i></a>
+              <a href="#"><i className="fab fa-linkedin-in"></i></a>
+            </div>
+          </div>
+        </div>
+        <div className="feedback-contact-form">
+          <span className="feedback-circle feedback-circle-one"></span>
+          <span className="feedback-circle feedback-circle-two"></span>
+          <form onSubmit={handleSubmit} autoComplete="off">
+            <h3 className="feedback-title">Feedback Form</h3>
+            <div className={`feedback-input-container ${focus.userName ? 'feedback-focus' : ''}`}>
+              <input
+                type="text"
+                name="userName"
+                className="feedback-input"
+                onFocus={() => handleFocus('userName')}
+                onBlur={(e) => handleBlur('userName', e.target.value)}
+              />
+              <label className="feedback-label">Name</label>
+              <span className="feedback-placeholder">Username</span>
+            </div>
+            <div className={`feedback-input-container ${focus.userEmail ? 'feedback-focus' : ''}`}>
+              <input
+                type="email"
+                name="userEmail"
+                className="feedback-input"
+                onFocus={() => handleFocus('userEmail')}
+                onBlur={(e) => handleBlur('userEmail', e.target.value)}
+              />
+              <label className="feedback-label">Email</label>
+              <span className="feedback-placeholder">Email</span>
+            </div>
+            <div className={`feedback-input-container ${focus.userPhone ? 'feedback-focus' : ''}`}>
+              <input
+                type="tel"
+                name="userPhone"
+                className="feedback-input"
+                onFocus={() => handleFocus('userPhone')}
+                onBlur={(e) => handleBlur('userPhone', e.target.value)}
+              />
+              <label className="feedback-label">Phone</label>
+              <span className="feedback-placeholder">Phone</span>
+            </div>
+            <div className={`feedback-input-container feedback-textarea ${focus.userMessage ? 'feedback-focus' : ''}`}>
+              <textarea
+                name="userMessage"
+                className="feedback-input"
+                onFocus={() => handleFocus('userMessage')}
+                onBlur={(e) => handleBlur('userMessage', e.target.value)}
+              ></textarea>
+              <label className="feedback-label">Message</label>
+              <span className="feedback-placeholder">Message</span>
+            </div>
+            <input type="submit" value="Send" className="feedback-btn" />
+          </form>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Feedback;
