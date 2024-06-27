@@ -16,9 +16,17 @@ Financial Hub is a comprehensive financial management system designed to address
    - Share knowledge, insights, and best practices within the Financial Hub community.
    - Contribute articles on finance-related subjects, share success stories, or provide tips and advice to fellow users.
 
-### 4. **Payment Processing**
-   - Process payments and manage financial transactions seamlessly.
-   - Handle invoicing, receiving payments, and managing expenses securely and efficiently.
+4.**Crypto Tracker Feature**
+The Crypto Tracker feature allows users to monitor real-time prices and trends of various cryptocurrencies. It is designed to provide comprehensive and up-to-date information to help users make informed decisions in the fast-paced world of digital currencies.
+
+Key Features:
+Real-Time Data: Fetches the latest prices and market data from popular cryptocurrency exchanges.
+Historical Data: Allows users to view historical prices and trends over various timeframes.
+Price Alerts: Users can set up custom alerts to get notified when a cryptocurrency reaches a specific price.
+Portfolio Management: Enables users to track their cryptocurrency investments and monitor portfolio performance.
+Interactive Charts: Provides detailed charts and graphs to visualize price movements and trends.
+Multiple Currencies: Supports a wide range of cryptocurrencies including Bitcoin (BTC), Ethereum (ETH), and many altcoins.
+User-Friendly Interface: Designed with an intuitive and easy-to-use interface to ensure a smooth user experience.
 
 ### 5. **Expense Calculation**
    - Track and calculate expenses effortlessly with built-in expense management tools.
