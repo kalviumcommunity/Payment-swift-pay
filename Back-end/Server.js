@@ -9,11 +9,10 @@ app.use(express.json());
 dotenv.config();
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEN_AI_KEY);
-
 app.get("/",async(req,res)=>{
   res.send('hi from venkat')
 
-}
+})
 
 app.post("/gemini", async (req, res) => {
   const { history, message } = req.body;
