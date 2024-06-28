@@ -114,7 +114,7 @@ const Business = () => {
         }
 
         // Get user's email or username
-        const userIdentifier = currentUser.email || currentUser.username;
+        const  userIdentifier = currentUser.email || currentUser.username;
         if (!userIdentifier) {
             console.log('User does not have an email or username');
             return;
