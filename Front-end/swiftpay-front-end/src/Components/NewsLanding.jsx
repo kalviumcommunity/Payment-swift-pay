@@ -251,8 +251,8 @@ const NewsPage = () => {
                 </section>
 
                 {/* Footer Section */}
-                <footer className="text-center text-blue-500 mt-6">
-                    <p>&copy; {new Date().getFullYear()} Financial Times. All rights reserved.</p>
+                <footer className="mt-12 pt-6 border-t border-gray-300 text-center">
+                    <p className="text-gray-600">@2024 FinancialHub. All rights reserved.</p>
                 </footer>
             </div>
         </div>

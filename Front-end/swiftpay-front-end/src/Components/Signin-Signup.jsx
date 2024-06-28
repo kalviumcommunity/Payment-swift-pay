@@ -49,7 +49,7 @@ const AuthForm = () => {
 
             if (user.emailVerified) {
                 toast.success('Logged in successfully!');
-                navigate('/Main');
+                navigate('/mainpage');
             } else {
                 toast.warning('Please verify your email address before logging in.');
             }
@@ -117,7 +117,7 @@ const AuthForm = () => {
                 toast.success('Welcome! You are logged in.');
                 Cookies.set('user', user.displayName, { expires: 7 });
                 Cookies.set('logedin', 'True', { expires: 7 });
-                navigate('/Main');
+                navigate('/mainpage');
             } else {
                 toast.warning('Please verify your email address before logging in.');
             }
@@ -144,7 +144,7 @@ const AuthForm = () => {
                 toast.success('Logged in successfully!');
                 Cookies.set('user', user.displayName, { expires: 7 });
                 Cookies.set('logedin', 'True', { expires: 7 });
-                navigate('/Main');
+                navigate('/mainpage');
             } else {
                 toast.warning('Please verify your email address before logging in.');
             }
@@ -164,7 +164,7 @@ const AuthForm = () => {
                 toast.success('Logged in successfully!');
                 Cookies.set('user', user.displayName, { expires: 7 });
                 Cookies.set('logedin', 'True', { expires: 7 });
-                navigate('/Main');
+                navigate('/mainpage');
             } else {
                 toast.warning('Please verify your email address before logging in.');
             }

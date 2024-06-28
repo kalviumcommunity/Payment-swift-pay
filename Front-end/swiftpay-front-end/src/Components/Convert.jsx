@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import image from  './../images/Bull.png';
+import TradingViewWidget from './TradingView';
 
 const ExchangeRateCalculator = () => {
   const [currencyOne, setCurrencyOne] = useState('USD');
@@ -33,12 +33,13 @@ const ExchangeRateCalculator = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen p-5 bg-gray-100">
-      <img src={image} alt="money icon" className="w-16" />
-      <h1 className="text-xl text-blue-500 mb-4  md:text-3xl">Exchange Rate Calculator</h1>
-      <p className="text-center mb-4">Choose the currency and the amounts to get the exchange rate</p>
+    <>
+    <TradingViewWidget/>
+    <div className="flex flex-col items-center justify-center h-screen p-5 md:10">
+      <h1 className="text-xl text-blue-500 mb-5 md:text-3xl ">Exchange Rate Calculator</h1>
+      <p className="text-center mb-5">Choose the currency and the amounts to get the exchange rate</p>
 
-      <div className="w-full max-w-sm bg-white p-6 rounded-lg shadow-md">
+      <div className="w-full max-w-sm bg-white p-6 md:10 rounded-lg shadow-md border-blue-500">
         <div className="currency mb-4">
           <select
             id="currency-one"
@@ -46,7 +47,7 @@ const ExchangeRateCalculator = () => {
             onChange={(e) => setCurrencyOne(e.target.value)}
             className="w-full px-3 py-2 border rounded-md"
           >
-           <option value="AED">AED</option>
+            <option value="AED">AED</option>
             <option value="ARS">ARS</option>
             <option value="AUD">AUD</option>
             <option value="BGN">BGN</option>
@@ -126,7 +127,7 @@ const ExchangeRateCalculator = () => {
             onChange={(e) => setCurrencyTwo(e.target.value)}
             className="w-full px-3 py-2 border rounded-md"
           >
-            <option value="AED">AED</option>
+           <option value="AED">AED</option>
             <option value="ARS">ARS</option>
             <option value="AUD">AUD</option>
             <option value="BGN">BGN</option>
@@ -178,6 +179,7 @@ const ExchangeRateCalculator = () => {
             <option value="UYU">UYU</option>
             <option value="VND">VND</option>
             <option value="ZAR">ZAR</option>
+            {/* Add other currency options here */}
           </select>
           <input
             type="number"
@@ -190,6 +192,7 @@ const ExchangeRateCalculator = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

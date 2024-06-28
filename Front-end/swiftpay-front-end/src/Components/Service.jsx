@@ -1,75 +1,61 @@
 import React from 'react';
-import ser from './../images/Ser.png'; // Assuming you have a services image
 import { Link } from 'react-router-dom';
-import "./Service.css"
 
 const ServicesPage = () => {
-    return (
-        <div className="services-page">
-            {/* Hero Banner */}
-            <div className="hero-banner relative">
-                <img src={ser} alt="Services Background" className="hero-image w-full h-auto" />
-                <div className="hero-content absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center text-center text-white">
-                </div>
+  return (
+    <div className="min-h-screen  py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white shadow-lg rounded-lg p-10">
+          <h1 className="text-4xl font-extrabold text-center text-blue-500 mb-8">Our Services</h1>
+          <p className="text-gray-700 mb-10 text-center">
+            Explore the range of services we offer to enhance your experience.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="bg-blue-50 p-6 rounded-lg shadow-md text-center">
+              <h2 className="text-2xl font-semibold text-blue-500 mb-4">Forum Discussions</h2>
+              <p className="text-gray-700">
+                Engage in insightful discussions with other users in our forums.
+              </p>
             </div>
-            
-            {/* Services Section */}
-            <div className="services-section py-12 ml-10 mr-5 ">
-                <div className=" mx-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {/* Service 1 */}
-                        <div className="bg-white shadow-md p-6 rounded-lg service-item">
-                            <h3 className="text-xl font-semibold mb-2 text-blue-500">News</h3>
-                            <p className="text-gray-700">
-                                Stay updated with the latest financial news and trends in our News section. Get timely insights on market developments, economic indicators, and global events shaping the financial landscape
-                            </p>
-                        </div>
-                        
-                        {/* Service 2 */}
-                        <div className="bg-white shadow-md p-6 rounded-lg service-item">
-                            <h3 className="text-xl font-semibold mb-2 text-blue-500">Blog</h3>
-                            <p className="text-gray-700">
-                                Discover expert advice and insights on personal finance, investments, and financial trends in our Blogs section. Written by industry professionals, our articles empower you to make informed decisions and take control of your financial future
-                            </p>
-                        </div>
-                        
-                        {/* Service 3 */}
-                        <div className="bg-white shadow-md p-6 rounded-lg service-item">
-                            <h3 className="text-xl font-semibold mb-2 text-blue-500">Payment</h3>
-                            <p className="text-gray-700">
-                                Experience hassle-free payments with our secure and efficient payment feature. Make transactions seamlessly, manage your expenses, and stay in control of your finances effortlessly
-                            </p>
-                        </div>
-                        
-                        <div className="bg-white shadow-md p-6 rounded-lg service-item">
-                            <h3 className="text-xl font-semibold mb-2 text-blue-500">Expense Calculator</h3>
-                            <p className="text-gray-700">
-                                Effortlessly manage your expenses with our intuitive expense calculator. Easily track your spending, set budgets, and gain insights into your financial habits. Take control of your finances and achieve your financial goals with ease
-                            </p>
-                        </div>
-
-                        <div className="bg-white shadow-md p-6 rounded-lg service-item">
-                            <h3 className="text-xl font-semibold mb-2 text-blue-500">Forum</h3>
-                            <p className="text-gray-700">
-                                Engage with a vibrant community of like-minded individuals in our forum. Share insights, ask questions, and connect with others on topics ranging from personal finance to investment strategies. Join the discussion, learn from others, and grow your financial knowledge together
-                            </p>
-                        </div>
-                        <div className="bg-white shadow-md p-6 rounded-lg service-item">
-                            <h3 className="text-xl font-semibold mb-2 text-blue-500">Learn</h3>
-                            <p className="text-gray-700">
-                                Finance is the art of managing money and assets to achieve financial goals. It involves budgeting, investing, and managing risk to build wealth and ensure economic stability. Financial literacy is crucial for making informed decisions about personal and business finance
-                            </p>
-                        </div>
-                    </div>
-                </div>
+            <div className="bg-blue-50 p-6 rounded-lg shadow-md text-center">
+              <h2 className="text-2xl font-semibold text-blue-500 mb-4">Blogs</h2>
+              <p className="text-gray-700">
+                Read and share your thoughts on various topics through our blogs.
+              </p>
             </div>
-            <div className="flex justify-center">
-                <Link to='/'>
-                    <button className='border border-blue-500 px-4 py-2 rounded-md text-blue-500 hover:bg-blue-500 hover:text-white mb-5'>Home</button>
-                </Link>
+            <div className="bg-blue-50 p-6 rounded-lg shadow-md text-center">
+              <h2 className="text-2xl font-semibold text-blue-500 mb-4">Budget Making</h2>
+              <p className="text-gray-700">
+                Create and manage your budgets with our easy-to-use tools.
+              </p>
             </div>
+            <div className="bg-blue-50 p-6 rounded-lg shadow-md text-center">
+              <h2 className="text-2xl font-semibold text-blue-500 mb-4">Cryptocurrency Tracking</h2>
+              <p className="text-gray-700">
+                Track the latest trends and your investments in cryptocurrencies.
+              </p>
+            </div>
+            <div className="bg-blue-50 p-6 rounded-lg shadow-md text-center">
+              <h2 className="text-2xl font-semibold text-blue-500 mb-4">News</h2>
+              <p className="text-gray-700">
+                Stay updated with the latest news from various sources.
+              </p>
+            </div>
+            <div className="bg-blue-50 p-6 rounded-lg shadow-md flex items-center justify-center h-full">
+                <p className="text-gray-700">
+                    Coming soon......
+                </p>
         </div>
-    );
+          </div>
+          <div className="flex justify-center mt-10">
+            <Link to="/" className="bg-white text-blue-500 font-semibold py-2 px-6 rounded ">
+              Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default ServicesPage;

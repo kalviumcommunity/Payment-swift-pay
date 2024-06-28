@@ -80,15 +80,6 @@ const Feedback = () => {
               <p>123-456-7898</p>
             </div>
           </div>
-          <div className="feedback-social-media">
-            <p>Connect with us :</p>
-            <div className="feedback-social-icons">
-              <a href="#"><i className="fab fa-facebook-f"></i></a>
-              <a href="#"><i className="fab fa-twitter"></i></a>
-              <a href="#"><i className="fab fa-instagram"></i></a>
-              <a href="#"><i className="fab fa-linkedin-in"></i></a>
-            </div>
-          </div>
         </div>
         <div className="feedback-contact-form">
           <span className="feedback-circle feedback-circle-one"></span>
