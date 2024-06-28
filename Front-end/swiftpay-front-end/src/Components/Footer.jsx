@@ -2,6 +2,7 @@ import React from 'react';
 import './Footer.css';
 import bull from "../images/Bull.png"
 import { Link } from 'react-router-dom';
+import { FaFacebookF, FaTwitter, FaInstagram } from 'react-icons/fa';
 
 function Footer() {
     return (
@@ -15,6 +16,7 @@ function Footer() {
                     <p>123 Main St, City, Country</p>
                     <p>Email: venkat@gmail.com</p>
                     <p>Phone: +91 9498407843</p>
+                    <Link to='/developer'>Developer</Link>
                 </div>
 
                 <div className="footer-section">
@@ -29,9 +31,21 @@ function Footer() {
                 <div className="footer-section mr-10" id='use'>
                     <h3 className='footer_titles'>Follow Us</h3>
                     <ul className="footer-social">
-                        <li className='footer_social'><a href="#facebook" className="footer_social-link"><i className="fab fa-facebook-f"></i></a></li>
-                        <li className='footer_social'><a href="#twitter" className="footer_social-link"><i className="fab fa-twitter"></i></a></li>
-                        <li className='footer_social'><a href="#instagram" className="footer_social-link"><i className="fab fa-instagram"></i></a></li>
+                        <li className='footer_social'>
+                            <a href="#facebook" className="footer_social-link">
+                                <FaFacebookF size={20} />
+                            </a>
+                        </li>
+                        <li className='footer_social'>
+                            <a href="#twitter" className="footer_social-link">
+                                <FaTwitter size={20} />
+                            </a>
+                        </li>
+                        <li className='footer_social'>
+                            <a href="#instagram" className="footer_social-link">
+                                <FaInstagram size={20} />
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>

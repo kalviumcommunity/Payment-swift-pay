@@ -1,287 +1,336 @@
 import React, { useState, useEffect } from 'react';
-import { collection, addDoc, onSnapshot, query, where, doc, deleteDoc, updateDoc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '../../Firebase/Fire.config';
-import bull from "./../images/Bull.png";
+import './bud.css';
+import { db,auth } from '../../Firebase/Fire.config';
+import { toast } from "react-toastify";
+import logo from "./../images/Bull.png"
+import { Link } from 'react-router-dom';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc,
+  getDoc,
+  setDoc,
+} from 'firebase/firestore';
 
 const BudgetApp = () => {
   const [budget, setBudget] = useState(0);
   const [expenses, setExpenses] = useState([]);
-  const [productTitle, setProductTitle] = useState('');
-  const [productCost, setProductCost] = useState('');
-  const [currentExpenseId, setCurrentExpenseId] = useState(null);
-  const [budgetError, setBudgetError] = useState(false);
-  const [titleError, setTitleError] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('Food'); // Default category
-  const [filteredCategory, setFilteredCategory] = useState('All'); // Default filter option
-  const [tipQuestion, setTipQuestion] = useState('');
-  const [submittedQuestion, setSubmittedQuestion] = useState(false);
-  
+  const [totalExpenses, setTotalExpenses] = useState(0);
+  const [budgetError, setBudgetError] = useState('');
+  const [productTitleError, setProductTitleError] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editAmount, setEditAmount] = useState('');
+  const [category, setCategory] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+
   useEffect(() => {
-    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+    const unsubscribe = onAuthStateChanged(auth, user => {
       if (user) {
-        const userEmail = user.email;
-
-        const budgetDocRef = doc(db, 'budgets', userEmail);
-        const unsubscribeBudget = onSnapshot(budgetDocRef, (doc) => {
-          if (doc.exists()) {
-            setBudget(doc.data().budget);
-          }
-        });
-
-        const expensesCollection = collection(db, 'expenses');
-        const expensesQuery = query(expensesCollection, where('userEmail', '==', userEmail));
-        const unsubscribeExpenses = onSnapshot(expensesQuery, (snapshot) => {
-          const fetchedExpenses = [];
-          snapshot.forEach((doc) => {
-            fetchedExpenses.push({ id: doc.id, ...doc.data() });
-          });
-          setExpenses(fetchedExpenses);
-        });
-
-        return () => {
-          unsubscribeBudget();
-          unsubscribeExpenses();
-        };
+        setCurrentUser(user);
+        fetchExpensesAndBudget();
       } else {
-        setBudget(0);
-        setExpenses([]);
+        setCurrentUser(null);
+        // Redirect to login or show login UI
+        toast.error("User is not authenticated");
       }
     });
 
-    return () => unsubscribeAuth();
-  }, []);
+    return () => unsubscribe();
+  }, [auth]);
+
+  const fetchExpensesAndBudget = async () => {
+    try {
+      // Fetch expenses
+      const querySnapshot = await getDocs(collection(db, 'expenses'));
+      const fetchedExpenses = [];
+      querySnapshot.forEach((doc) => {
+        fetchedExpenses.push({ id: doc.id, ...doc.data() });
+      });
+      setExpenses(fetchedExpenses);
+      setTotalExpenses(fetchedExpenses.reduce((acc, expense) => acc + expense.amount, 0));
+
+      // Fetch budget
+      const budgetDoc = await getDoc(doc(db, 'budget', 'userBudget'));
+      if (budgetDoc.exists()) {
+        setBudget(budgetDoc.data().amount);
+        document.getElementById('amount').innerText = budgetDoc.data().amount;
+        document.getElementById('balance-amount').innerText = budgetDoc.data().amount - fetchedExpenses.reduce((acc, expense) => acc + expense.amount, 0);
+      }
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+      toast.error("Error fetching data");
+    }
+  };
 
   const handleSetBudget = async () => {
-    if (budget <= 0) {
-      setBudgetError(true);
-      return;
-    }
-
-    setBudgetError(false);
-
-    try {
-      const userEmail = auth.currentUser.email;
-      const budgetDocRef = doc(db, 'budgets', userEmail);
-      await setDoc(budgetDocRef, { budget });
-      console.log('Budget set successfully in Firestore!');
-    } catch (error) {
-      console.error('Error setting budget in Firestore:', error);
+    const budgetInput = document.getElementById('total-amount').value;
+    if (budgetInput === '' || budgetInput <= 0) {
+      setBudgetError('Value cannot be empty or negative');
+    } else {
+      const newBudget = parseFloat(budgetInput);
+      try {
+        await setDoc(doc(db, 'budget', 'userBudget'), { amount: newBudget });
+        setBudget(newBudget);
+        setBudgetError('');
+        document.getElementById('amount').innerText = newBudget;
+        document.getElementById('balance-amount').innerText = newBudget - totalExpenses;
+        document.getElementById('total-amount').value = '';
+      } catch (e) {
+        console.error('Error setting budget: ', e);
+        toast.error('Error setting budget');
+      }
     }
   };
 
   const handleAddExpense = async () => {
-    if (productTitle === '' || productCost === '' || parseFloat(productCost) <= 0) {
-      setTitleError(true);
-      return;
-    }
-    setTitleError(false);
-
-    const cost = parseFloat(productCost);
-    if (isNaN(cost) || cost <= 0) {
-      setTitleError(true);
-      return;
-    }
-
-    try {
-      const userEmail = auth.currentUser.email;
-      if (currentExpenseId) {
-        const expenseDoc = doc(db, 'expenses', currentExpenseId);
-        await updateDoc(expenseDoc, { title: productTitle, cost, category: selectedCategory });
-        console.log('Expense updated successfully!');
-        setCurrentExpenseId(null);
-      } else {
-        const currentDate = new Date(); // Include the current date/time
-        const newExpense = {
-          title: productTitle,
-          cost,
-          userEmail,
-          category: selectedCategory,
-          date: currentDate, // Include the current date/time
-        };
-
-        await addDoc(collection(db, 'expenses'), newExpense);
-        console.log('Expense added successfully!');
+    const title = document.getElementById('product-title').value;
+    const amount = document.getElementById('user-amount').value;
+    if (title === '' || amount === '' || amount <= 0) {
+      setProductTitleError('Values cannot be empty or negative');
+    } else {
+      const newExpense = { title, amount: parseFloat(amount), category };
+      try {
+        const docRef = await addDoc(collection(db, 'expenses'), newExpense);
+        setExpenses([...expenses, { id: docRef.id, ...newExpense }]);
+        const newTotalExpenses = totalExpenses + parseFloat(amount);
+        setTotalExpenses(newTotalExpenses);
+        setProductTitleError('');
+        document.getElementById('expenditure-value').innerText = newTotalExpenses;
+        document.getElementById('balance-amount').innerText = budget - newTotalExpenses;
+        document.getElementById('product-title').value = '';
+        document.getElementById('user-amount').value = '';
+        setCategory('');
+      } catch (e) {
+        console.error('Error adding document: ', e);
+        toast.error('Error adding expense');
       }
-    } catch (error) {
-      console.error('Error adding/updating expense:', error);
     }
-
-    setProductTitle('');
-    setProductCost('');
   };
 
-  const handleEditExpense = (expense) => {
-    setProductTitle(expense.title);
-    setProductCost(expense.cost);
-    setCurrentExpenseId(expense.id);
-    setSelectedCategory(expense.category);
-  };
-
-  const handleDeleteExpense = async (expenseId) => {
+  const handleDeleteExpense = async (expenseId, amount) => {
     try {
-      const expenseDoc = doc(db, 'expenses', expenseId);
-      await deleteDoc(expenseDoc);
-      console.log('Expense deleted successfully!');
-    } catch (error) {
-      console.error('Error deleting expense:', error);
+      await deleteDoc(doc(db, 'expenses', expenseId));
+      const newExpenses = expenses.filter(expense => expense.id !== expenseId);
+      const newTotalExpenses = totalExpenses - parseFloat(amount);
+      setExpenses(newExpenses);
+      setTotalExpenses(newTotalExpenses);
+      document.getElementById('balance-amount').innerText = budget - newTotalExpenses;
+      document.getElementById('expenditure-value').innerText = newTotalExpenses;
+    } catch (e) {
+      console.error('Error removing document: ', e);
+      toast.error('Error deleting expense');
     }
   };
 
-  const handleCategoryFilter = (category) => {
-    setFilteredCategory(category);
+  const handleEditExpense = (id, title, amount) => {
+    setIsEditing(true);
+    setEditId(id);
+    setEditTitle(title);
+    setEditAmount(amount);
+    document.getElementById('product-title').value = title;
+    document.getElementById('user-amount').value = amount;
   };
 
-  const handleSubmitTipQuestion = async () => {
-    if (tipQuestion.trim() === '') {
-      return; // Don't submit empty questions
-    }
-
-    try {
-      await addDoc(collection(db, 'tipQuestions'), { question: tipQuestion });
-      setSubmittedQuestion(true);
-      setTipQuestion(''); // Clear the input field after submission
-    } catch (error) {
-      console.error('Error submitting tip question:', error);
+  const handleUpdateExpense = async () => {
+    if (editTitle === '' || editAmount === '' || editAmount <= 0) {
+      setProductTitleError('Values cannot be empty or negative');
+    } else {
+      const updatedExpense = { title: editTitle, amount: parseFloat(editAmount), category };
+      try {
+        const expenseRef = doc(db, 'expenses', editId);
+        await updateDoc(expenseRef, updatedExpense);
+        const updatedExpenses = expenses.map(expense => expense.id === editId ? { id: editId, ...updatedExpense } : expense);
+        setExpenses(updatedExpenses);
+        const newTotalExpenses = updatedExpenses.reduce((acc, expense) => acc + expense.amount, 0);
+        setTotalExpenses(newTotalExpenses);
+        setIsEditing(false);
+        setEditId(null);
+        setEditTitle('');
+        setEditAmount('');
+        document.getElementById('expenditure-value').innerText = newTotalExpenses;
+        document.getElementById('balance-amount').innerText = budget - newTotalExpenses;
+        document.getElementById('product-title').value = '';
+        document.getElementById('user-amount').value = '';
+        setCategory('');
+      } catch (e) {
+        console.error('Error updating document: ', e);
+        toast.error('Error updating expense');
+      }
     }
   };
+  const handleFilterChange = (e) => {
+    setFilterCategory(e.target.value);
+  };
+
+  const filteredExpenses = filterCategory
+    ? expenses.filter(expense => expense.category === filterCategory)
+    : expenses;
 
   return (
-    <div className="mx-auto px-4">
-      <div className="flex items-center justify-between">
-        <img className='w-10 h-10 mt-10 mr-4' src={bull} alt="" />
-        <h1 className="text-3xl font-bold text-center text-blue-500">Finance Buddy</h1>
-        <div className="w-10 h-10"></div> {/* Placeholder for right side content */}
-      </div>
-      <div className="lg:w-3/4 xl:w-1/2 lg:mx-auto mt-8">
-        <div className="total-amount-container bg-white shadow-md p-4 rounded-lg">
-          <h3 className="text-xl font-bold text-gray-800">Set Budget</h3>
-          {budgetError && <p className="text-red-500">Value cannot be empty or negative</p>}
-          <input
-            type="number"
-            value={budget}
-            onChange={(e) => setBudget(parseFloat(e.target.value))}
-            className="w-full p-2 border border-gray-300 rounded mt-2 focus:border-blue-500"
-            placeholder="Enter Total Amount"
-          />
-          <button
-            className="w-full bg-blue-500 text-white py-2 mt-2 rounded hover:bg-blue-700"
-            onClick={handleSetBudget}
-          >
-            Set Budget
-          </button>
-        </div>
-
-        <div className="user-amount-container bg-white shadow-md p-4 rounded-lg mt-4">
-          <h3 className="text-xl font-bold text-gray-800">Add Expense</h3>
-          {titleError && <p className="text-red-500">Values cannot be empty or negative</p>}
-          <input
-            type="text"
-            value={productTitle}
-            onChange={(e) => setProductTitle(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded mt-2 focus:border-blue-500"
-            placeholder="Enter Title of Product"
-          />
-          <input
-            type="number"
-            value={productCost}
-            onChange={(e) => setProductCost(parseFloat(e.target.value))}
-            className="w-full p-2 border border-gray-300 rounded mt-2 focus:border-blue-500"
-            placeholder="Enter Cost of Product"
-          />
-          <select
-            className="w-full p-2 border border-gray-300 rounded mt-2 focus:border-blue-500"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            <option value="Food">Food</option>
-            <option value="Health Care">Health Care</option>
-            <option value="Entertainment">Entertainment</option>
-            <option value="Transportation">Transportation</option>
-            <option value="Utilities">Utilities</option>
-            <option value="Clothing">Clothing</option>
-            <option value="Education">Education</option>
-            <option value="Travel">Travel</option>
-          </select>
-          <button
-            className="w-full bg-blue-500 text-white py-2 mt-2 rounded hover:bg-blue-700"
-            onClick={handleAddExpense}
-          >
-            {currentExpenseId ? 'Update Expense' : 'Add Expense'}
-          </button>
-        </div>
-
-        <div className="output-container flex justify-between mt-6 p-4 bg-blue-500 rounded-lg shadow-md">
-          <div>
-            <p className="text-white font-medium">Total Budget</p>
-            <span className="text-lg font-semibold">{budget.toFixed(2)}</span>
+    <>
+<nav className="bg-white shadow-lg">
+                <div className="max-w-7xl mx-auto px-4 py-2">
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                            <img src={logo} alt="Logo" className="h-10 w-auto" />
+                            <Link to="/" className="text-blue-500 text-lg font-bold ml-2 hover:text-blue-700">
+                                Financial Hub
+                            </Link>
+                        </div>
+                        <div className="md:hidden">
+                            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-blue-500 hover:text-blue-700 focus:outline-none">
+                                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    {isMenuOpen ? (
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    ) : (
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                                    )}
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="hidden md:flex items-center space-x-4">
+                            <Link to="" className="text-blue-500 hover:text-blue-700 relative hover:border-b-2 hover:border-blue-500">
+                                Learn
+                            </Link>
+                            <span className="text-gray-400">|</span>
+                            <Link to="" className="text-blue-500 hover:text-blue-700 relative hover:border-b-2 hover:border-blue-500">
+                                Talk with experts
+                            </Link>
+                            <span className="text-gray-400">|</span>
+                            <Link to="" className="text-blue-500 hover:text-blue-700 relative hover:border-b-2 hover:border-blue-500">
+                                Contact Us
+                            </Link>
+                        </div>
+                        <div className="hidden md:flex items-center">
+                            <Link to="">
+                                <button className="text-black bg-transparent border border-blue-500 px-4 py-2 transition duration-300 transform hover:scale-105 hover:shadow-md hover:bg-blue-500 hover:text-white">
+                                    Back
+                                </button>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+                {/* Mobile Menu */}
+                <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
+                <div className="hidden md:flex items-center space-x-4">
+                            <Link to="" className="text-blue-500 hover:text-blue-700 relative hover:border-b-2 hover:border-blue-500">
+                                Learn
+                            </Link>
+                            <span className="text-gray-400">|</span>
+                            <Link to="" className="text-blue-500 hover:text-blue-700 relative hover:border-b-2 hover:border-blue-500">
+                                Talk with experts
+                            </Link>
+                            <span className="text-gray-400">|</span>
+                            <Link to="" className="text-blue-500 hover:text-blue-700 relative hover:border-b-2 hover:border-blue-500">
+                                Contact Us
+                            </Link>
+                        </div>
+                    <Link to="">
+                        <div className="bg-gray-100 py-4 px-4 flex justify-center">
+                            <button className="text-black bg-transparent border border-blue-500 hover:bg-blue-500 hover:text-white px-4 py-2 transition duration-300">
+                                Back
+                            </button>
+                        </div>
+                    </Link>
+                </div>
+            </nav>
+      <div className="budget-app__wrapper">
+        <div className="budget-app__container">
+          <div className="budget-app__sub-container">
+            <div className="budget-app__total-amount-container">
+              <h3>Budget</h3>
+              {budgetError && <p className="budget-app__error">{budgetError}</p>}
+              <input type="number" id="total-amount" placeholder="Enter Total Amount" className="bg-gray-100 border border-gray-300 rounded-md p-2 my-2" />
+              <button className="budget-app__submit bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600" onClick={handleSetBudget}>Set Budget</button>
+            </div>
+            <div className="budget-app__user-amount-container">
+              <h3>Expenses</h3>
+              {productTitleError && <p className="budget-app__error">{productTitleError}</p>}
+              <input type="text" className="budget-app__product-title bg-gray-100 border border-gray-300 rounded-md p-2 my-2" id="product-title" placeholder="Enter Title of Product" />
+              <input type="number" id="user-amount" placeholder="Enter Cost of Product" className="bg-gray-100 border border-gray-300 rounded-md p-2 my-2" />
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="bg-gray-100 border border-gray-300 rounded-md p-2 my-2 cursor-pointer"
+              >
+                <option value="">Select Category</option>
+                <option value="Food">Food</option>
+                <option value="Transport">Transport</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Others">Others</option>
+              </select>
+              {isEditing ? (
+                <button className="budget-app__submit bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600" onClick={handleUpdateExpense}>Update Expense</button>
+              ) : (
+                <button className="budget-app__submit bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600" onClick={handleAddExpense}>Add Expense</button>
+              )}
+            </div>
           </div>
-          <div>
-            <p className="text-white font-medium">Total Expenses</p>
-            <span className="text-lg font-semibold">{expenses.reduce((acc, expense) => acc + expense.cost, 0).toFixed(2)}</span>
-          </div>
-          <div>
-            <p className="text-white font-medium">Balance</p>
-            <span className="text-lg font-semibold">{(budget - expenses.reduce((acc, expense) => acc + expense.cost, 0)).toFixed(2)}</span>
+          <div className="budget-app__output-container flex justify-around mt-8">
+            <div className="text-center">
+              <p className="text-gray-600">Total Budget</p>
+              <span id="amount" className="text-2xl font-semibold">${budget}</span>
+            </div>
+            <div className="text-center">
+              <p className="text-gray-600">Expenses</p>
+              <span id="expenditure-value" className="text-2xl font-semibold">${totalExpenses}</span>
+            </div>
+            <div className="text-center">
+              <p className="text-gray-600">Balance</p>
+              <span id="balance-amount" className="text-2xl font-semibold">${budget - totalExpenses}</span>
+            </div>
           </div>
         </div>
-
-        <div className="category-filter-container mt-6">
-          <h3 className="text-xl font-bold text-gray-800">Filter Expenses</h3>
-          <select
-            className="w-full p-2 border border-gray-300 rounded mt-2 focus:border-blue-500"
-            value={filteredCategory}
-            onChange={(e) => handleCategoryFilter(e.target.value)}
-          >
-            <option value="All">All</option>
-            <option value="Food">Food</option>
-            <option value="Health Care">Health Care</option>
-            <option value="Entertainment">Entertainment</option>
-            <option value="Transportation">Transportation</option>
-            <option value="Utilities">Utilities</option>
-            <option value="Clothing">Clothing</option>
-            <option value="Education">Education</option>
-            <option value="Travel">Travel</option>
-          </select>
-        </div>
-
-        <div className="list mt-6">
-          <h3 className="text-xl font-bold text-gray-800">Expense List</h3>
-          <ul className="mt-4">
-            {expenses
-              .filter((expense) => filteredCategory === 'All' || expense.category === filteredCategory)
-              .map((expense) => (
-                <li key={expense.id} className="flex justify-between items-center p-4 bg-white border border-gray-300 rounded-lg shadow-md mb-2">
-                  <div>
-                    <span>{expense.title}</span>
-                    <p className="text-gray-500 text-sm mt-1">{expense.category}</p>
-                    {/* Add date here */}
-                    {expense.date && expense.date.seconds && (
-                      <p className="text-gray-500 text-sm mt-1">{new Date(expense.date.seconds * 1000).toLocaleDateString()}</p>
-                    )}
-                  </div>
-                  <span>{expense.cost.toFixed(2)}</span>
-                  <div className="flex space-x-2">
-                    <button
-                      className="bg-blue-600 text-white py-1 px-2 rounded hover:bg-blue-700"
-                      onClick={() => handleEditExpense(expense)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="bg-red-600 text-white py-1 px-2 rounded hover:bg-red-700"
-                      onClick={() => handleDeleteExpense(expense.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </li>
-              ))}
-          </ul>
+        <div className="budget-app__list mt-8" id="list">
+          <div className="budget-app__filter-container">
+            <select
+              value={filterCategory}
+              onChange={handleFilterChange}
+              className="bg-gray-100 border border-gray-300 rounded-md p-2 my-2 cursor-pointer"
+            >
+              <option value="">Filter by Category</option>
+              <option value="Food">Food</option>
+              <option value="Transport">Transport</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Others">Others</option>
+            </select>
+          </div>
+          <h3 className="mt-4">Expense List</h3>
+          {filteredExpenses.map(expense => (
+            <div
+              className="sublist-content p-4 bg-gray-50 border-l-4 border-blue-500 mb-4 grid grid-cols-3 items-center rounded-lg shadow relative mt-12"
+              key={expense.id}
+              data-id={expense.id}
+            >
+              <p className="product font-medium">{expense.title} ({expense.category})</p>
+              <div className="amount text-center text-gray-700">${expense.amount.toFixed(2)}</div>
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex space-x-2">
+                <button
+                  className="edit text-green-500 hover:text-blue-700"
+                  onClick={() => handleEditExpense(expense.id, expense.title, expense.amount)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="delete text-red-500 hover:text-blue-700"
+                  onClick={() => handleDeleteExpense(expense.id, expense.amount)}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-      <div className="flex justify-center mt-8">
-      </div>
-    </div>
+    </>
   );
 };
 

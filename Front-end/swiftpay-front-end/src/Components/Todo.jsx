@@ -14,11 +14,10 @@ import { db, auth } from '../../Firebase/Fire.config';
 import 'tailwindcss/tailwind.css';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
-import bull from './../images/Bull.png';
-import sgMail from '@sendgrid/mail';
+import Bull from './../images/Bull.png';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { Link } from 'react-router-dom';
 
 
 const TOdo = () => {
@@ -32,10 +31,11 @@ const TOdo = () => {
     const [tasks, setTasks] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
     const [pendingTasks, setPendingTasks] = useState([]);
+    const [filterCategory, setFilterCategory] = useState('');
+    const [sortOrder, setSortOrder] = useState('asc');
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const navigate = useNavigate();
-
-  
 
     // Monitor authentication state
     useEffect(() => {
@@ -61,14 +61,32 @@ const TOdo = () => {
                     tasksList.push(task);
                 });
 
-                setTasks(tasksList);
-                updatePendingTasks(tasksList);
-                checkTasksDueToday(tasksList);
+                const filteredAndSortedTasks = filterAndSortTasks(tasksList);
+                setTasks(filteredAndSortedTasks);
+                updatePendingTasks(filteredAndSortedTasks);
+                checkTasksDueToday(filteredAndSortedTasks);
             });
 
             return () => unsubscribe();
         }
-    }, [currentUser]);
+    }, [currentUser, filterCategory, sortOrder]);
+
+    // Function to filter and sort tasks
+    const filterAndSortTasks = (tasksList) => {
+        let filteredTasks = tasksList;
+
+        if (filterCategory) {
+            filteredTasks = filteredTasks.filter(task => task.category === filterCategory);
+        }
+
+        filteredTasks.sort((a, b) => {
+            const dateA = new Date(`${a.dueDate}T${a.dueTime || '00:00'}`);
+            const dateB = new Date(`${b.dueDate}T${b.dueTime || '00:00'}`);
+            return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+        });
+
+        return filteredTasks;
+    };
 
     // Function to update the pending tasks list based on due time
     const updatePendingTasks = (tasksList) => {
@@ -216,8 +234,61 @@ const TOdo = () => {
     };
 
     return (
+        <>
+        <nav className="bg-white shadow-lg">
+                <div className="mx-auto px-4 py-2 max-w-7xl">
+                    <div className="flex justify-between items-center">
+                        <div className="flex-shrink-0 flex items-center">
+                            <img src={Bull} alt="" className="h-10 w-auto" />
+                            <a href="#" className="text-blue-500 text-lg font-bold ml-2 hover:text-shadow text-shadow-blur-2">Financial hub</a>
+                        </div>
+                        <div className="md:hidden">
+                            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-blue-500 hover:text-blue-700 focus:outline-none">
+                                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    {isMenuOpen ? (
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    ) : (
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                                    )}
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="hidden md:flex md:items-center md:justify-center flex-1">
+                            <Link to="/About">
+                                <a href="#" className="text-blue-500 hover:text-blue-700 mx-4 relative hover:text-shadow text-shadow-blur-2" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }}>About Us<span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span></a>
+                            </Link>
+                            <span className="text-gray-400 mx-2">|</span>
+                            <Link to='/Service'>
+                                <a href="#" className="text-blue-500  hover:text-shadow text-shadow-blur-2 hover:text-blue-700 mx-4 relative" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }} >Services<span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span></a>
+                            </Link>
+                            <span className="text-gray-400 mx-2">|</span>
+                            <Link to="/contact"><a href="#" className="text-blue-500  hover:text-shadow text-shadow-blur-2 hover:text-blue-700 mx-4 relative" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }} >Contact Us
+                                <span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span>
+                            </a></Link>
+                        </div>
+                        <div className="hidden md:flex md:items-center">
+                            <Link to="/">
+                                <button className="text-black bg-transparent border border-blue-500 px-4 py-2 transition duration-300 transform hover:scale-105 hover:shadow-md hover:bg-blue-500 hover:text-white">Back</button>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+                {/* Mobile Menu */}
+                <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
+                    <div className="bg-gray-50 py-4">
+                        <Link to='/About'><a href="#" className={`block py-2 px-4 text-sm text-blue-500 hover:bg-gray-100`}>About</a></Link>
+                        <Link to='/Service'><a href="#" className={`block py-2 px-4 text-sm text-blue-500 hover:bg-gray-100`} >Services</a></Link>
+                        <Link to='contact'><a href="#" className={`block py-2 px-4 text-sm text-blue-500 hover:bg-gray-100`} >Contact Us</a></Link>
+                    </div>
+                    <Link to="/">
+                        <div className="bg-gray-100 py-4 px-4 flex justify-center">
+                            <button className="text-black bg-transparent border border-blue-500 hover:bg-blue-500 hover:text-white px-4 py-2 transition duration-300">Back</button>
+                        </div>
+                    </Link>
+                </div>
+            </nav>
+        
         <div className="mx-auto py-10 px-4">
-            <img className="w-10 h-10 " src={bull} alt="" />
             <h1 className="text-4xl font-bold text-center mb-8 text-blue-500">Fiscal Focus</h1>
 
             {/* React Toastify container */}
@@ -291,55 +362,82 @@ const TOdo = () => {
                 </div>
             </form>
 
-            {/* Task list */}
-            <div className="w-full max-w-md mx-auto">
-                {tasks.map((task) => {
-                    const overdue = isTaskOverdue(task);
-                    return (
-                        <div
-                            key={task.id}
-                            className={`card card-bordered shadow-md mb-4 p-4 rounded-lg ${
-                                task.priority === 'High' ? 'border-red-500' :
-                                task.priority === 'Medium' ? 'border-yellow-500' :
-                                'border-green-500'
-                            } ${overdue ? 'bg-red-300' : ''}`}
-                        >
-                            <div className="flex justify-between items-center mb-2">
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={task.completed}
-                                        onChange={() => updateTask(task.id, { completed: !task.completed })}
-                                        className="checkbox checkbox-primary mr-2"
-                                    />
-                                    <p className={`font-medium ${task.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
-                                        {task.task}
-                                    </p>
-                                </div>
-                                <button
-                                    className="btn btn-danger btn-sm"
-                                    onClick={() => deleteTask(task.id)}
-                                >
-                                    Delete
-                                </button>
-                            </div>
+            {/* Category filter and sort order selection */}
+            <div className="w-full max-w-md mx-auto mb-4">
+                <div className="flex justify-between items-center">
+                    <select
+                        value={filterCategory}
+                        onChange={(e) => setFilterCategory(e.target.value)}
+                        className="select select-primary"
+                    >
+                        <option value="">All Categories</option>
+                        {tasks.map((task, index) => (
+                            <option key={index} value={task.category}>{task.category}</option>
+                        ))}
+                    </select>
 
-                            {overdue && (
-                                <div className="text-xs text-red-600 font-bold mb-2">Pending</div>
-                            )}
-                            <div className="flex flex-col space-y-1">
-                                <p className="text-sm text-gray-600">Priority: {task.priority}</p>
-                                <p className="text-sm text-gray-600">Due Date: {task.dueDate}</p>
-                                <p className="text-sm text-gray-600">Due Time: {task.dueTime || '00:00'}</p>
-                                <p className="text-sm text-gray-600">Category: {task.category}</p>
-                                <p className="text-sm text-gray-600">Notes: {task.notes}</p>
-                                <p className="text-sm text-gray-600">Recurrence: {task.recurrence || 'None'}</p>
-                            </div>
-                        </div>
-                    );
-                })}
+                    <select
+                        value={sortOrder}
+                        onChange={(e) => setSortOrder(e.target.value)}
+                        className="select select-primary"
+                    >
+                        <option value="asc">Sort by Date: Ascending</option>
+                        <option value="desc">Sort by Date: Descending</option>
+                    </select>
+                </div>
+            </div>
+
+            {/* Task table */}
+            <div className="w-full max-w-5xl mx-auto mt-6">
+                <div className="overflow-x-auto">
+                    <table className="table-auto w-full text-left bg-white shadow-md rounded-lg">
+                        <thead>
+                            <tr className="bg-gray-200 text-gray-700">
+                                <th className="px-4 py-2">Task</th>
+                                <th className="px-4 py-2">Priority</th>
+                                <th className="px-4 py-2">Due Date</th>
+                                <th className="px-4 py-2">Due Time</th>
+                                <th className="px-4 py-2">Category</th>
+                                <th className="px-4 py-2">Notes</th>
+                                <th className="px-4 py-2">Recurrence</th>
+                                <th className="px-4 py-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {tasks.map((task) => {
+                                const overdue = isTaskOverdue(task);
+                                return (
+                                    <tr key={task.id} className={`border-t ${overdue ? 'bg-red-300' : ''}`}>
+                                        <td className="px-4 py-2">{task.task}</td>
+                                        <td className="px-4 py-2">{task.priority}</td>
+                                        <td className="px-4 py-2">{task.dueDate}</td>
+                                        <td className="px-4 py-2">{task.dueTime || '00:00'}</td>
+                                        <td className="px-4 py-2">{task.category}</td>
+                                        <td className="px-4 py-2">{task.notes}</td>
+                                        <td className="px-4 py-2">{task.recurrence || 'None'}</td>
+                                        <td className="px-4 py-2 flex items-center space-x-2">
+                                            <input
+                                                type="checkbox"
+                                                checked={task.completed}
+                                                onChange={() => updateTask(task.id, { completed: !task.completed })}
+                                                className="checkbox checkbox-primary mr-2"
+                                            />
+                                            <button
+                                                className="btn btn-danger btn-sm"
+                                                onClick={() => deleteTask(task.id)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+    </>
     );
 };
 

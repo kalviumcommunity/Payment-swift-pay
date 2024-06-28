@@ -1,9 +1,11 @@
 import React from 'react';
 import './FinancialTimes.css'; // Import additional CSS file if needed
 import { Link } from 'react-router-dom';
+import Main from './Main';
 
 const FinancialTimes = () => {
   return (
+    <>
     <div className="financial-times  mx-auto p-4">
       {/* Heading section */}
       <h1 className="font-serif text-4xl font-bold text-center mb-10 text-blue-500">
@@ -35,6 +37,7 @@ const FinancialTimes = () => {
       {/* Horizontal line */}
       <hr className="my-8 border-gray-300" />
     </div>
+    </>
   );
 };
 

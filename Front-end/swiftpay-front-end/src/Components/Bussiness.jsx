@@ -50,7 +50,7 @@ const Business = () => {
   }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData =  async () => {
       try {
         const apiKey = '55e97b2991a74a577a0ab4baa650903b';
         const apiUrl = `https://gnews.io/api/v4/search?q=Business&lang=en&sortby=publishedAt&apikey=${apiKey}`;

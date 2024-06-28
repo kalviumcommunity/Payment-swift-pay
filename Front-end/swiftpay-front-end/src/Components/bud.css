@@ -1,9 +1,262 @@
-.court {
-    width: 400px; /* Adjust according to your preference */
-    height: 400px; /* Adjust according to your preference */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+/* General Reset */
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+ 
+
+/* Navbar Styles */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff; /* Changed to white */
+  padding: 1em 2em;
+  color: #587ef4; /* Changed text color to blue */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Added strong box shadow */
+}
+
+.navbar__left {
+  display: flex;
+  align-items: center;
+}
+
+.navbar__button {
+  background-color: #000;
+  color: #587ef4; /* Changed text color to blue */
+  padding: 0.5em 0.5em;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 1em;
+  transition: background-color 0.3s ease;
+}
+
+.navbar__button:hover {
+  background-color: #333;
+}
+
+.navbar__title {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #587ef4; /* Changed text color to blue */
+}
+
+.navbar__links {
+  list-style: none;
+  display: flex;
+  gap: 1em;
+}
+
+.navbar__links a {
+  color: #587ef4; /* Changed text color to blue */
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.navbar__links a:hover {
+  color: #333; /* Changed hover text color to dark grey */
+}
+
+/* BudgetApp Styles */
+.budget-app__wrapper {
+  width: 90%;
+  font-size: 16px;
+  max-width: 800px;
+  margin: 2em auto;
+  background: #fff;
+  padding: 2em;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.budget-app__container {
+  width: 100%;
+}
+
+.budget-app__sub-container {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2em;
+}
+
+.budget-app__flex {
+  display: flex;
+  align-items: center;
+}
+
+.budget-app__flex-space {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.budget-app__wrapper h3 {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 1em;
+}
+
+.budget-app__container input {
+  display: block;
+  width: 100%;
+  padding: 0.75em 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  color: #333;
+  outline: none;
+  font-weight: 400;
+  margin-bottom: 1em;
+  transition: border-color 0.3s ease;
+}
+
+.budget-app__container input:focus {
+  border-color: #587ef4;
+}
+
+.budget-app__total-amount-container,
+.budget-app__user-amount-container {
+  background-color: #fafafa;
+  padding: 1.5em;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.budget-app__output-container {
+  background-color: #587ef4;
+  color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin: 2em 0;
+  padding: 1.5em;
+}
+
+.budget-app__output-container p {
+  font-weight: 600;
+  margin-bottom: 0.5em;
+}
+
+.budget-app__output-container span {
+  display: block;
+  text-align: center;
+  font-weight: 400;
+  color: #e5e5e5;
+}
+
+.budget-app__submit {
+  font-size: 1em;
+  background-color: #587ef4;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  padding: 0.75em 1.5em;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.budget-app__submit:hover {
+  background-color: #4663d1;
+}
+
+.budget-app__list {
+  background-color: #ffffff;
+  padding: 1.5em;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+}
+
+.budget-app__sublist-content {
+  width: 100%;
+  border-left: 4px solid #587ef4;
+  margin-bottom: 1em;
+  padding: 0.75em 1em;
+  display: grid;
+  grid-template-columns: 3fr 2fr 1fr 1fr;
+  align-items: center;
+}
+
+.budget-app__product {
+  font-weight: 500;
+  color: #333;
+}
+
+.budget-app__amount {
+  color: #555;
+  margin-left: 20%;
+}
+
+.budget-app__icons-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.budget-app__product-title {
+  margin-bottom: 1em;
+}
+
+.budget-app__hide {
+  display: none;
+}
+
+.budget-app__error {
+  color: #ff465a;
+  font-size: 0.875em;
+  margin-bottom: 1em;
+}
+
+.budget-app__edit {
+  margin-left: auto;
+}
+
+.budget-app__edit,
+.budget-app__delete {
+  background: transparent;
+  cursor: pointer;
+  margin-right: 0.5em;
+  border: none;
+  color: #587ef4;
+  transition: color 0.3s ease;
+}
+
+.budget-app__edit:hover,
+.budget-app__delete:hover {
+  color: #4663d1;
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 600px) {
+  .budget-app__wrapper {
+    font-size: 14px;
   }
-  
+
+  .budget-app__sub-container {
+    grid-template-columns: 1fr;
+    gap: 1em;
+  }
+
+  .budget-app__sublist-content {
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navbar__left {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1em;
+  }
+
+  .navbar__links {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+}
