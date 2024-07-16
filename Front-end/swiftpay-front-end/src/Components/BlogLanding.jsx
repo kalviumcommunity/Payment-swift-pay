@@ -28,10 +28,10 @@ const BlogLanding = () => {
         <div className="min-h-screen flex flex-col items-center justify-center">
             <div className="mx-auto max-w-6xl px-8 py-12 text-gray-800">
                 {/* Header Section */}
-                <header className="relative mb-12  flex justify-between items-center w-full">
-                    <img className="w-10 h-10 mb-8" src={bull} alt="Financial Hub Logo" />
+                <header className="relative mb-12 flex justify-between items-center w-full">
+                    <img className="w-10 h-10 hidden md:block" src={bull} alt="Financial Hub Logo" />
                     <div className="text-center w-full">
-                        <h1 className="text-5xl font-bold text-blue-500">Financial Hub</h1>
+                        <h1 className="text-5xl font-bold text-blue-500">Financial Blogs</h1>
                         <motion.p 
                             className="text-xl mt-4"
                             initial={{ opacity: 0, scale: 0.5 }}
@@ -63,18 +63,32 @@ const BlogLanding = () => {
                         >
                             Stay ahead of the market with insightful blogs and articles tailored for you.
                         </motion.p>
-                        <a href="https://my-next-app-p2rh.vercel.app/" target="_blank" rel="noopener noreferrer">
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="bg-blue-500 text-white px-6 py-3 rounded-full shadow-lg hover:bg-indigo-700 transition duration-300"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.7 }}
-                            >
-                                Explore Blogs
-                            </motion.button>
-                        </a>
+                        <div className="flex space-x-4">
+                            <a href="https://my-next-app-p2rh.vercel.app/" target="_blank" rel="noopener noreferrer">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="bg-blue-500 text-white px-6 py-3 rounded-full shadow-lg transition duration-300"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.7 }}
+                                >
+                                    Explore Blogs
+                                </motion.button>
+                            </a>
+                            <a href="/" target="_blank" rel="noopener noreferrer">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="bg-blue-500 text-white px-6 py-3 rounded-full shadow-lg  transition duration-300"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.7 }}
+                                >
+                                    Home
+                                </motion.button>
+                            </a>
+                        </div>
                     </div>
 
                     {/* Image Content */}

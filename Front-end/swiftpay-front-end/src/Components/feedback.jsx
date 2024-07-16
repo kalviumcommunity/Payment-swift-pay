@@ -6,6 +6,8 @@ import { toast } from 'react-toastify';
 import emailIcon from "./../images/Email.png";
 import phoneIcon from "./../images/telephone-call-symbol-smartphone-ringing-phone-removebg-preview.png";
 import locationIcon from './../images/location.png';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from "react-router-dom";
 import Dots from "./../images/Dots2.jpg";
 
@@ -28,6 +30,10 @@ const Feedback = () => {
   };
 
   const navigate = useNavigate();
+
+  const handleBackClick = () => {
+    navigate(-1); // Navigate back to the previous page
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,6 +66,9 @@ const Feedback = () => {
       <span className="feedback-big-circle"></span>
       <img src={Dots} className="feedback-square" alt="background decoration" />
       <div className="feedback-form-container">
+        <button onClick={handleBackClick} className="feedback-back-button">
+          <FontAwesomeIcon icon={faArrowLeft} />
+        </button>
         <div className="feedback-contact-info">
           <h3 className="feedback-title">Give us your feedback</h3>
           <p className="feedback-text">

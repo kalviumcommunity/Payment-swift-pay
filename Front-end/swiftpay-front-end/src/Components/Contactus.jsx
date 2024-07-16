@@ -2,6 +2,8 @@ import * as React from "react";
 import { db } from "../../Firebase/Fire.config";
 import { collection, addDoc } from "firebase/firestore"; 
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { FaTimes } from "react-icons/fa";
 
 export default function Contact() {
   const [formData, setFormData] = React.useState({
@@ -11,6 +13,8 @@ export default function Contact() {
     phoneNumber: '',
     message: '',
   });
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -27,8 +31,7 @@ export default function Contact() {
         ...formData,
         timestamp: new Date(),
       });
-      toast.success("thank you for details");
-      // Optionally clear the form after submission
+      toast.success("Thank you for your details!");
       setFormData({
         lastName: '',
         firstName: '',
@@ -39,6 +42,10 @@ export default function Contact() {
     } catch (e) {
       console.error("Error adding document: ", e);
     }
+  };
+
+  const handleClose = () => {
+    navigate('/'); // navigate to the landing page
   };
 
   return (
@@ -52,7 +59,10 @@ export default function Contact() {
             Reach out, and let's create a universe of possibilities together!
           </div>
         </div>
-        <form onSubmit={handleSubmit} className="p-5 mt-16 rounded-3xl border-2 border-solid backdrop-blur-[190px] bg-white bg-opacity-0 border-blue-500 max-md:mt-10 max-md:max-w-full">
+        <button onClick={handleClose} className="absolute top-5 right-5 text-blue-500">
+          <FaTimes size={30} />
+        </button>
+        <form onSubmit={handleSubmit} className="relative p-5 mt-16 rounded-3xl border-2 border-solid backdrop-blur-[190px] bg-white bg-opacity-0 border-blue-500 max-md:mt-10 max-md:max-w-full">
           <div className="flex gap-5 max-md:flex-col max-md:gap-0">
             <div className="flex flex-col w-6/12 max-md:ml-0 max-md:w-full">
               <div className="flex flex-col grow p-10 max-md:px-5 max-md:mt-10 max-md:max-w-full">

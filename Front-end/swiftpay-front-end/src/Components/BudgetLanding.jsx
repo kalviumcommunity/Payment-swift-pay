@@ -1,11 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalculator, faChartBar, faClock } from '@fortawesome/free-solid-svg-icons';
+import { faCalculator, faChartBar, faClock, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import 'tailwindcss/tailwind.css';
-import bull from "./../images/Bull.png";
+import bull from './../images/Bull.png';
 import { Link } from 'react-router-dom';
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import ReactPlayer from 'react-player';
 
 const BudgetLanding = () => {
@@ -53,18 +52,32 @@ const BudgetLanding = () => {
                         >
                             Calculate with Confidence: Get Real-Time Financial Insights at Your Fingertips.
                         </motion.p>
-                        <Link to="/Budget">
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="bg-white text-blue-500 px-6 py-3 rounded-full shadow-lg hover:bg-gray-200 transition duration-300"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.7 }}
-                            >
-                                Get Started
-                            </motion.button>
-                        </Link>
+                        <div className="flex space-x-4">
+                            <Link to="/Budget">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="bg-blue-500 text-white px-6 py-3 rounded-full shadow-lg transition duration-300"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.7 }}
+                                >
+                                    Get Started
+                                </motion.button>
+                            </Link>
+                            <a href="/" target="_blank" rel="noopener noreferrer">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="bg-blue-500 text-white px-6 py-3 rounded-full shadow-lg transition duration-300"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.7 }}
+                                >
+                                    Home
+                                </motion.button>
+                            </a>
+                        </div>
                     </div>
 
                     {/* Image Content */}

@@ -1,10 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom'; // or useNavigate for React Router v6
 import { motion } from 'framer-motion';
-import { FaUsers, FaComments, FaChartLine, FaBook, FaNewspaper } from 'react-icons/fa';
+import { FaUsers, FaComments, FaChartLine } from 'react-icons/fa';
 import ReactPlayer from 'react-player';
 import forumLogo from './../images/Bull.png';
 
 const ForumLanding = () => {
+    const navigate = useNavigate();
+
     // Sample data for latest discussions
     const latestDiscussions = [
         {
@@ -25,11 +28,11 @@ const ForumLanding = () => {
     ];
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center">
-            <div className="mx-auto max-w-6xl px-8 py-12 text-gray-800">
+        <div className="min-h-screen flex flex-col items-center justify-center mt-0 w-full">
+            <div className="w-full px-4 md:px-8 py-12 text-gray-800">
                 {/* Header Section */}
-                <header className="relative mb-12 mt-8 flex justify-between items-center w-full">
-                    <img className="w-10 h-10" src={forumLogo} alt="Finance Forum Logo" />
+                <header className="relative mb-12 flex justify-between items-center w-full">
+                    <img className="w-10 h-10 hidden md:block" src={forumLogo} alt="Finance Forum Logo" />
                     <div className="text-center w-full">
                         <h1 className="text-5xl font-bold text-blue-500">Finance Forum</h1>
                         <motion.p 
@@ -44,7 +47,7 @@ const ForumLanding = () => {
                 </header>
 
                 {/* Hero Section */}
-                <section className="flex flex-col-reverse md:flex-row items-center justify-between mb-12">
+                <section className="flex flex-col-reverse md:flex-row items-center justify-between mb-12 w-full">
                     {/* Text Content */}
                     <div className="md:w-1/2 p-6">
                         <motion.h2
@@ -63,11 +66,11 @@ const ForumLanding = () => {
                         >
                             Engage with industry experts and peers to stay ahead in the financial world.
                         </motion.p>
-                        <a href= 'https://financialforum.netlify.app' target="_blank" >
+                        <a href='https://financialforum.netlify.app' target="_blank" rel="noopener noreferrer">
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="bg-blue-500 text-white px-6 py-3 rounded-full shadow-lg hover:bg-indigo-700 transition duration-300"
+                                className="bg-blue-500 text-white px-6 py-3 rounded-full shadow-lg transition duration-300"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.7 }}
@@ -75,6 +78,17 @@ const ForumLanding = () => {
                                 Explore the Forum
                             </motion.button>
                         </a>
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="bg-blue-500 text-white px-6 py-3 rounded-full shadow-lg transition duration-300 mt-4 ml-0 md:ml-5"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.7 }}
+                            onClick={() => navigate('/mainPage')}
+                        >
+                            Home
+                        </motion.button>
                     </div>
 
                     {/* Image Content */}
@@ -91,7 +105,7 @@ const ForumLanding = () => {
                 </section>
 
                 {/* Latest Discussions Section */}
-                <section className="mb-12">
+                <section className="mb-12 w-full">
                     <h2 className="text-3xl font-semibold text-center mb-6 text-blue-500">Latest Discussions</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4">
                         {latestDiscussions.map((discussion, index) => (
@@ -114,61 +128,21 @@ const ForumLanding = () => {
                 </section>
 
                 {/* Video Play Area */}
-                <section className="mb-12">
+                <section className="mb-12 w-full">
                     <h2 className="text-3xl font-semibold text-center mb-6 text-blue-500">What is Financial Literacy?</h2>
                     <div className="flex justify-center">
                         <ReactPlayer
                             url="https://www.youtube.com/watch?v=QjxjnwTuK8E&pp=ygUjd2hhdCBpcyBtZWFuIGJ5IGZpbmFuY2lhbCBsaXRlcmFjeSA%3D"
                             className="rounded-lg shadow-lg"
                             width="100%"
-                            height="400px"
+                            height="400px" // Increased height
                             controls
                         />
                     </div>
                 </section>
 
-                {/* Features Section */}
-                <section className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                    {/* Feature Cards */}
-                    <motion.div
-                        className="bg-white p-6 rounded-lg shadow-lg text-center"
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.3 }}
-                    >
-                        <FaUsers className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold text-blue-500 mb-2">Community Support</h3>
-                        <p className="text-gray-700">
-                            Get advice and support from a vibrant community of finance enthusiasts.
-                        </p>
-                    </motion.div>
-
-                    <motion.div
-                        className="bg-white p-6 rounded-lg shadow-lg text-center"
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.3 }}
-                    >
-                        <FaComments className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold text-blue-500 mb-2">Expert Discussions</h3>
-                        <p className="text-gray-700">
-                            Participate in in-depth discussions with industry experts.
-                        </p>
-                    </motion.div>
-
-                    <motion.div
-                        className="bg-white p-6 rounded-lg shadow-lg text-center"
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.3 }}
-                    >
-                        <FaChartLine className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold text-blue-500 mb-2">Market Insights</h3>
-                        <p className="text-gray-700">
-                            Stay updated with the latest market trends and insights.
-                        </p>
-                    </motion.div>
-                </section>
-
                 {/* Testimonials Section */}
-                <section className="mb-12">
+                <section className="mb-12 w-full">
                     <h2 className="text-3xl font-semibold text-center mb-8 text-blue-500">What Our Members Say</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="bg-white p-6 rounded-lg shadow-lg">
@@ -187,7 +161,7 @@ const ForumLanding = () => {
                 </section>
 
                 {/* FAQ Section */}
-                <section className="mb-12">
+                <section className="mb-12 w-full">
                     <h2 className="text-3xl font-semibold text-center mb-8 text-blue-500">Frequently Asked Questions</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Question 1 */}
@@ -222,7 +196,7 @@ const ForumLanding = () => {
                 </section>
 
                 {/* Footer Section */}
-                <footer className="mt-12 pt-6 border-t border-gray-300 text-center">
+                <footer className="mt-12 pt-6 border-t border-gray-300 text-center w-full">
                     <p className="text-gray-600">@2024 FinancialHub. All rights reserved.</p>
                 </footer>
             </div>

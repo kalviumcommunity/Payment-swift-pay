@@ -140,7 +140,7 @@ function LandingPage() {
 
       <div className='mt-5'>
         <div className="text-center mb-4 mr-15">
-          <a className="text-blue-500 underline" href="https://parallexvenkat.netlify.app/" target="_blank" rel="noopener noreferrer">Major features</a>
+          <a className="text-blue-500 underline" href="https://66895dd704e1c1c7979418b8--superlative-strudel-765970.netlify.app/" target="_blank" rel="noopener noreferrer">Major features</a>
         </div>
       </div>
 

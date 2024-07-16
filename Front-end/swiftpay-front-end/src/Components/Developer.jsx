@@ -1,10 +1,23 @@
 import React from 'react';
-import { FaYahoo, FaGoogle, FaMicrosoft } from 'react-icons/fa';
+import { FaYahoo, FaGoogle, FaMicrosoft, FaTimes } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const ProfileCard = () => {
+  const history = useNavigate();
+
+  const handleClose = () => {
+    history('/');
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-200">
-      <div className="bg-gray-100 p-6 rounded-lg shadow-lg">
+      <div className="bg-gray-100 p-6 rounded-lg shadow-lg relative">
+        <button
+          onClick={handleClose}
+          className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
+        >
+          <FaTimes size="1.5em" />
+        </button>
         <div className="flex flex-col md:flex-row bg-white rounded-lg overflow-hidden shadow-md h-full">
           <div className="md:w-1/3">
             <img src="https://i.imgur.com/aCwpF7V.jpg" alt="Profile" className="w-full h-full object-cover" />
@@ -28,7 +41,7 @@ const ProfileCard = () => {
               </div>
               <div className="flex-1 text-center p-4 bg-green-500 text-white flex flex-col justify-center h-full">
                 <h4 className="text-2xl font-bold">70%</h4>
-                <h6 className="text-lg">javascript</h6>
+                <h6 className="text-lg">JavaScript</h6>
               </div>
               <div className="flex-1 text-center p-4 bg-yellow-500 text-white flex flex-col justify-center h-full">
                 <h4 className="text-2xl font-bold">80%</h4>
