@@ -16,7 +16,6 @@ import Crypto from './Components/Crypto.jsx';
 import Business from './Components/Bussiness.jsx';
 import Finance from './Components/Finance.jsx';
 import Stock from './Components/Stock.jsx';
-import ExchangeRateCalculator from './Components/Convert.jsx';
 import BudgetApp from './Components/BudgetApp.jsx';
 import TOdo from './Components/Todo.jsx';
 import NewsPage from './Components/NewsLanding.jsx';;
@@ -51,7 +50,6 @@ function App() {
           <Route path='/Business' element={<Layout><Business /></Layout>} />
           <Route path='/Finance' element={<Layout><Finance /></Layout>} />
           <Route path='/Stock' element={<Layout><Stock /></Layout>} />
-          <Route path='/Exchange' element={<ExchangeRateCalculator />} />
           <Route path='/To' element={<TOdo />} />
           <Route path='/News' element={<NewsPage />} />
           <Route path='/Budget' element={<BudgetApp />} />

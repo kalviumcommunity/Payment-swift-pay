@@ -258,8 +258,8 @@ const TOdo = () => {
                             </a>
                         </div>
                         <div className="hidden md:flex md:items-center">
-                            <Link to="">
-                                <button className="text-black bg-transparent border border-blue-500 px-4 py-2 transition duration-300 transform hover:scale-105 hover:shadow-md hover:bg-blue-500 hover:text-white">Get Started</button>
+                            <Link to="/mainpage">
+                                <button className="text-black bg-transparent border border-blue-500 px-4 py-2 transition duration-300 transform hover:scale-105 hover:shadow-md hover:bg-blue-500 hover:text-white">Back</button>
                             </Link>
                         </div>
                     </div>
@@ -267,11 +267,14 @@ const TOdo = () => {
                 {/* Mobile Menu */}
                 <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
                     <div className="bg-gray-50 py-4">
-                        <Link to='/About'><a href="#" className={`block py-2 px-4 text-sm text-blue-500 hover:bg-gray-100`}>About</a></Link>
-                        <Link to='/Service'><a href="#" className={`block py-2 px-4 text-sm text-blue-500 hover:bg-gray-100`} >Services</a></Link>
-                        <Link to='contact'><a href="#" className={`block py-2 px-4 text-sm text-blue-500 hover:bg-gray-100`} >Contact Us</a></Link>
-                    </div>
                     <Link to="/mainpage">
+                                <a href="#" className="text-blue-500 hover:text-blue-700 mx-4 relative hover:text-shadow text-shadow-blur-2" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }}>Home<span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span></a>
+                            </Link>
+                            <a href="https://www.wikihow.com/Keep-Track-of-Your-Personal-Finances" className="text-blue-500  hover:text-shadow text-shadow-blur-2 hover:text-blue-700 mx-4 relative" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }} >Learn more
+                                <span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span>
+                            </a>
+                    </div>
+                    <Link to="/To">
                         <div className="bg-gray-100 py-4 px-4 flex justify-center">
                             <button className="text-black bg-transparent border border-blue-500 hover:bg-blue-500 hover:text-white px-4 py-2 transition duration-300">Back</button>
                         </div>

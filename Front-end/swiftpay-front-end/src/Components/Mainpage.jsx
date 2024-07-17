@@ -167,12 +167,12 @@ const Mainpage = () => {
                   <h3 className="text-xl font-semibold mb-2">AI Services</h3>
                 </div>
               </a>
-              <Link to="/Exchange">
+              <a href="https://currency-financial-hub.netlify.app/" target='_blank'>
                 <div className="flex flex-col items-center">
                   <FaMoneyBillWave className="text-blue-500 text-6xl mb-4" />
                   <h3 className="text-xl font-semibold mb-2">Currency Converter</h3>
                 </div>
-              </Link>
+              </a>
               <Link to="/To">
                 <div className="flex flex-col items-center">
                   <FaTasks className="text-blue-500 text-6xl mb-4" />
