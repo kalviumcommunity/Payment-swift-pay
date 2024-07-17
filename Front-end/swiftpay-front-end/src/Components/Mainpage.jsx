@@ -4,6 +4,7 @@ import { useSpring, animated } from 'react-spring';
 import { FaComments, FaBlog, FaCalculator, FaChartLine, FaNewspaper, FaRobot, FaTwitter, FaFacebookF, FaInstagram, FaTasks, FaMoneyBillWave, FaBitcoin } from 'react-icons/fa';
 import Main from './Main';
 import { Link } from 'react-router-dom';
+import Footer from './Footer';
 
 const translations = [
   { welcome: "स्वागत", financialHub: "वित्तीय केंद्र" }, // Hindi
@@ -68,7 +69,7 @@ const MultilingualWelcome = ({ userName }) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setIndex(prevIndex => (prevIndex + 1) % translations.length);
+      setIndex((prevIndex) => (prevIndex + 1) % translations.length);
     }, 3000); // Change every 3 seconds
 
     return () => clearInterval(interval);
@@ -87,14 +88,18 @@ const MultilingualWelcome = ({ userName }) => {
       <p className="text-sm md:text-lg text-center mb-5">
         {userName ? (
           <>
-            Aboard, <strong>{userName}</strong>! Step into a world of financial possibilities with 
+            Aboard, <strong>{userName}</strong>! Step into a world of financial possibilities with
             <span> </span>
             <animated.span className="text-blue-500" style={props}>
               {financialHubText}
-            </animated.span>!
+            </animated.span>
+            !
           </>
         ) : (
-          <>Step into a world of financial possibilities with <animated.span style={props}>{financialHubText}</animated.span>! Welcome aboard!</>
+          <>
+            Step into a world of financial possibilities with{' '}
+            <animated.span style={props}>{financialHubText}</animated.span>! Welcome aboard!
+          </>
         )}
       </p>
     </>
@@ -120,75 +125,72 @@ const Mainpage = () => {
   return (
     <>
       <Main />
-      <div className="grid grid-cols-1 gap-y-10 py-10 bg-gray-100">
+      <div className="flex flex-col items-center py-10 ">
         {/* Welcome Section */}
         <div className="flex flex-col items-center px-6">
           <MultilingualWelcome userName={userName} />
-          <div className="flex mt-6">
-          </div>
         </div>
 
         {/* Features Section */}
-        <section className="bg-white py-16 w-full">
+        <section className=" py-16 w-full">
           <div className="mx-auto px-4">
             <h2 className="text-4xl font-bold text-center text-blue-500 mb-8">Our Features</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          <Link to='/BlogLanding'><div className="flex flex-col items-center">
-                <FaBlog className="text-blue-500 text-6xl mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Financial Blog</h3>
-              </div></Link> 
-             <Link to='Blanding'><div className="flex flex-col items-center">
-                <FaCalculator className="text-blue-500 text-6xl mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Expense Calculator</h3>
-              </div></Link> 
-              <Link to='ForumLanding'><div className="flex flex-col items-center">
-                <FaComments className="text-blue-500 text-6xl mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Financial Forum</h3>
-              </div></Link>
-             <Link to='/Exchange'><div className="flex flex-col items-center">
-                <FaMoneyBillWave className="text-blue-500 text-6xl mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Currency Converter</h3>
-              </div></Link> 
-              <Link to=''><div className="flex flex-col items-center">
-                <FaTasks className="text-blue-500 text-6xl mb-4" />
-                <h3 className="text-xl font-semibold mb-2">To-Do List</h3>
-              </div></Link>
-             <Link to='/NewsLanding'> <div className="flex flex-col items-center">
-                <FaNewspaper className="text-blue-500 text-6xl mb-4" />
-                <h3 className="text-xl font-semibold mb-2">News</h3>
-              </div></Link>
-              <a href='https://668963cdabe78a804ab44cef--chic-hotteok-93e044.netlify.app/' target='_blank'><div className="flex flex-col items-center">
-                <FaRobot className="text-blue-500 text-6xl mb-4" />
-                <h3 className="text-xl font-semibold mb-2">AI Services</h3>
-              </div></a>
-              <a href='https://crypto-beryl-ten.vercel.app/' traget='_blank'><div className="flex flex-col items-center">
-                <FaBitcoin className="text-blue-500 text-6xl mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Crypto Tracker</h3>
-              </div></a>
-            </div>
-          </div>
-        </section>
-
-        {/* Follow Us Section */}
-        <section className="bg-blue-500 py-8 w-full">
-          <div className="mx-auto text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">Follow Us</h2>
-            <div className="flex justify-center space-x-6">
-              <a href="https://twitter.com" className="text-white text-4xl">
-                <FaTwitter />
+              <Link to="/BlogLanding">
+                <div className="flex flex-col items-center">
+                  <FaBlog className="text-blue-500 text-6xl mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Financial Blog</h3>
+                </div>
+              </Link>
+              <Link to="/Blanding">
+                <div className="flex flex-col items-center">
+                  <FaCalculator className="text-blue-500 text-6xl mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Expense Calculator</h3>
+                </div>
+              </Link>
+              <Link to="/ForumLanding">
+                <div className="flex flex-col items-center">
+                  <FaComments className="text-blue-500 text-6xl mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Financial Forum</h3>
+                </div>
+              </Link>
+              <Link to="/Exchange">
+                <div className="flex flex-col items-center">
+                  <FaMoneyBillWave className="text-blue-500 text-6xl mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Currency Converter</h3>
+                </div>
+              </Link>
+              <Link to="/To">
+                <div className="flex flex-col items-center">
+                  <FaTasks className="text-blue-500 text-6xl mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">To-Do List</h3>
+                </div>
+              </Link>
+              <Link to="/NewsLanding">
+                <div className="flex flex-col items-center">
+                  <FaNewspaper className="text-blue-500 text-6xl mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">News</h3>
+                </div>
+              </Link>
+              <a href="https://668963cdabe78a804ab44cef--chic-hotteok-93e044.netlify.app/" target="_blank" rel="noopener noreferrer">
+                <div className="flex flex-col items-center">
+                  <FaRobot className="text-blue-500 text-6xl mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">AI Services</h3>
+                </div>
               </a>
-              <a href="https://facebook.com" className="text-white text-4xl">
-                <FaFacebookF />
-              </a>
-              <a href="https://instagram.com" className="text-white text-4xl">
-                <FaInstagram />
+              <a href="https://crypto-beryl-ten.vercel.app/" target="_blank" rel="noopener noreferrer">
+                <div className="flex flex-col items-center">
+                  <FaBitcoin className="text-blue-500 text-6xl mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Crypto Tracker</h3>
+                </div>
               </a>
             </div>
           </div>
         </section>
       </div>
+      <Footer/>
     </>
   );
-}
+};
 
 export default Mainpage;
