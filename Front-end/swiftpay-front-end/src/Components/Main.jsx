@@ -47,7 +47,15 @@ const Main = () => {
                             </button>
                         </div>
                         <div className="hidden md:flex md:items-center md:justify-center flex-1">
-                           
+                                <a href="https://www.livemint.com/market" target='_blank' className="text-blue-500 hover:text-blue-700 mx-4 relative hover:text-shadow text-shadow-blur-2" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }}>India<span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span></a>
+                            <span className="text-gray-400 mx-2">|</span>
+                            <a href="https://www.marketwatch.com/investing/index/nik?countrycode=jp" target='_blank' className="text-blue-500  hover:text-shadow text-shadow-blur-2 hover:text-blue-700 mx-4 relative" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }} >Japan
+                                <span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span>
+                            </a>
+                            <span className="text-gray-400 mx-2">|</span>
+                            <a href="https://www.cnbc.com/europe-markets/" target='_blank' className="text-blue-500  hover:text-shadow text-shadow-blur-2 hover:text-blue-700 mx-4 relative" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }} >Europe
+                                <span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span>
+                            </a>
                         </div>
                         <div className="hidden md:flex md:items-center">
                             <button onClick={handleLogout} className="text-black bg-transparent border border-blue-500 px-4 py-2 transition duration-300 transform hover:scale-105 hover:shadow-md hover:bg-blue-500 hover:text-white">Log out</button>
