@@ -3,10 +3,8 @@ import { motion } from 'framer-motion';
 import { Newspaper, Settings, Bell, ArrowRight } from 'lucide-react';
 import ReactPlayer from 'react-player';
 import 'tailwindcss/tailwind.css';
-import bull from "./../images/Bull.png"
+import bull from "./../images/Bull.png";
 import { Link } from 'react-router-dom';
-
-
 
 const HorizontalScrollingNews = ({ newsStories }) => {
     return (
@@ -23,9 +21,11 @@ const HorizontalScrollingNews = ({ newsStories }) => {
                         <img src={story.image} alt={story.title} className="rounded-lg mb-2 w-full" />
                         <h3 className="text-lg font-semibold mb-2">{story.title}</h3>
                         <p className="text-gray-700 mb-4">{story.excerpt}</p>
-                        <Link to='/Crypto'><button className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center hover:bg-indigo-700 transition duration-300">
-                            Read More <ArrowRight className="ml-2" />
-                        </button></Link> 
+                        <Link to='/Crypto'>
+                            <button className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center hover:bg-indigo-700 transition duration-300">
+                                Read More <ArrowRight className="ml-2" />
+                            </button>
+                        </Link>
                     </motion.div>
                 ))}
             </div>
@@ -55,39 +55,38 @@ const NewsPage = () => {
             image: 'https://th.bing.com/th/id/OIP.hvN5mJAbk1TjtMxLYdQ5tQAAAA?rs=1&pid=ImgDetMain',
             title: 'Indian markets are growing',
             excerpt:"Indian markets are showing robust growth, driven by a young workforce and rising middle class.more and more middle class people are investing"
-           
         },
     ];
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-cente">
+        <div className="min-h-screen flex flex-col items-center justify-center">
             <div className="mx-auto max-w-6xl px-8 py-12 text-blue-500">
                 {/* Header Section */}
                 <header className="relative mb-12 text-center">
-    {/* The absolute-positioned bull image */}
-    <img
-        src={bull}
-        alt="Bull"
-        className="w-10 h-10 mr-72 absolute top-0 left-0"
-    />
-    {/* Header text */}
-    <motion.h1
-        className="text-5xl font-bold text-blue-500"
-        initial={{ opacity: 5, scale: 0.5 }}
-        animate={{ opacity: 5, scale: 1 }}
-        transition={{ duration: 0.9 }}
-    >
-        Financial Times
-    </motion.h1>
-    <motion.p
-        className="text-xl mt-4 text-black"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.7, delay: 0.3 }}
-    >
-        Your reliable source for the latest financial news and stories.
-    </motion.p>
-</header>
+                    {/* The absolute-positioned bull image */}
+                    <img
+                        src={bull}
+                        alt="Bull"
+                        className="w-10 h-10 mr-72 absolute top-0 left-0 hidden md:block"
+                    />
+                    {/* Header text */}
+                    <motion.h1
+                        className="text-5xl font-bold text-blue-500"
+                        initial={{ opacity: 5, scale: 0.5 }}
+                        animate={{ opacity: 5, scale: 1 }}
+                        transition={{ duration: 0.9 }}
+                    >
+                        Financial Times
+                    </motion.h1>
+                    <motion.p
+                        className="text-xl mt-4 text-black"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.7, delay: 0.3 }}
+                    >
+                        Your reliable source for the latest financial news and stories.
+                    </motion.p>
+                </header>
 
                 {/* Hero Section */}
                 <section className="flex flex-col-reverse md:flex-row items-center justify-between mb-12">
@@ -109,16 +108,32 @@ const NewsPage = () => {
                         >
                             Get the latest financial news stories from around the world delivered to your screen.
                         </motion.p>
-                        <Link to="/Business"><motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="bg-white text-blue-500 px-6 py-3 rounded-full shadow-lg hover:bg-gray-200 transition duration-300"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.7 }}
-                        >
-                           Get started
-                        </motion.button></Link>
+                        <div className="flex space-x-4">
+                            <Link to="/Business">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="bg-blue-500 text-white px-6 py-3 rounded-full shadow-lg "
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.7 }}
+                                >
+                                    Get started
+                                </motion.button>
+                            </Link>
+                            <Link to="/mainpage">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="bg-blue-500 text-white px-6 py-3 rounded-full shadow-lg "
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.7 }}
+                                >
+                                    Home
+                                </motion.button>
+                            </Link>
+                        </div>
                     </div>
 
                     {/* Image Content */}
@@ -206,8 +221,8 @@ const NewsPage = () => {
                                 "A great source for financial news from all over the world. Highly recommend subscribing!"
                             </p>
                             <p className="text-blue-500 font-semibold mt-4">- Maria S."
-                        </p>
-                    </div>
+                            </p>
+                        </div>
                     </div>
                 </section>
 

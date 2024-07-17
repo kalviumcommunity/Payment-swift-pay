@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './bud.css';
-import { db,auth } from '../../Firebase/Fire.config';
+import { db, auth } from '../../Firebase/Fire.config';
 import { toast } from "react-toastify";
-import logo from "./../images/Bull.png"
+import Bull from "./../images/Bull.png"
 import { Link } from 'react-router-dom';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import {
   collection,
   addDoc,
@@ -15,6 +14,7 @@ import {
   getDoc,
   setDoc,
 } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const BudgetApp = () => {
   const [budget, setBudget] = useState(0);
@@ -35,21 +35,19 @@ const BudgetApp = () => {
     const unsubscribe = onAuthStateChanged(auth, user => {
       if (user) {
         setCurrentUser(user);
-        fetchExpensesAndBudget();
+        fetchExpensesAndBudget(user.uid);
       } else {
         setCurrentUser(null);
-        // Redirect to login or show login UI
         toast.error("User is not authenticated");
       }
     });
 
     return () => unsubscribe();
-  }, [auth]);
+  }, []);
 
-  const fetchExpensesAndBudget = async () => {
+  const fetchExpensesAndBudget = async (uid) => {
     try {
-      // Fetch expenses
-      const querySnapshot = await getDocs(collection(db, 'expenses'));
+      const querySnapshot = await getDocs(collection(db, `users/${uid}/expenses`));
       const fetchedExpenses = [];
       querySnapshot.forEach((doc) => {
         fetchedExpenses.push({ id: doc.id, ...doc.data() });
@@ -57,8 +55,7 @@ const BudgetApp = () => {
       setExpenses(fetchedExpenses);
       setTotalExpenses(fetchedExpenses.reduce((acc, expense) => acc + expense.amount, 0));
 
-      // Fetch budget
-      const budgetDoc = await getDoc(doc(db, 'budget', 'userBudget'));
+      const budgetDoc = await getDoc(doc(db, `users/${uid}/budget`, 'userBudget'));
       if (budgetDoc.exists()) {
         setBudget(budgetDoc.data().amount);
         document.getElementById('amount').innerText = budgetDoc.data().amount;
@@ -77,7 +74,7 @@ const BudgetApp = () => {
     } else {
       const newBudget = parseFloat(budgetInput);
       try {
-        await setDoc(doc(db, 'budget', 'userBudget'), { amount: newBudget });
+        await setDoc(doc(db, `users/${currentUser.uid}/budget`, 'userBudget'), { amount: newBudget });
         setBudget(newBudget);
         setBudgetError('');
         document.getElementById('amount').innerText = newBudget;
@@ -98,7 +95,7 @@ const BudgetApp = () => {
     } else {
       const newExpense = { title, amount: parseFloat(amount), category };
       try {
-        const docRef = await addDoc(collection(db, 'expenses'), newExpense);
+        const docRef = await addDoc(collection(db, `users/${currentUser.uid}/expenses`), newExpense);
         setExpenses([...expenses, { id: docRef.id, ...newExpense }]);
         const newTotalExpenses = totalExpenses + parseFloat(amount);
         setTotalExpenses(newTotalExpenses);
@@ -117,7 +114,7 @@ const BudgetApp = () => {
 
   const handleDeleteExpense = async (expenseId, amount) => {
     try {
-      await deleteDoc(doc(db, 'expenses', expenseId));
+      await deleteDoc(doc(db, `users/${currentUser.uid}/expenses`, expenseId));
       const newExpenses = expenses.filter(expense => expense.id !== expenseId);
       const newTotalExpenses = totalExpenses - parseFloat(amount);
       setExpenses(newExpenses);
@@ -145,7 +142,7 @@ const BudgetApp = () => {
     } else {
       const updatedExpense = { title: editTitle, amount: parseFloat(editAmount), category };
       try {
-        const expenseRef = doc(db, 'expenses', editId);
+        const expenseRef = doc(db, `users/${currentUser.uid}/expenses`, editId);
         await updateDoc(expenseRef, updatedExpense);
         const updatedExpenses = expenses.map(expense => expense.id === editId ? { id: editId, ...updatedExpense } : expense);
         setExpenses(updatedExpenses);
@@ -166,6 +163,7 @@ const BudgetApp = () => {
       }
     }
   };
+
   const handleFilterChange = (e) => {
     setFilterCategory(e.target.value);
   };
@@ -176,14 +174,12 @@ const BudgetApp = () => {
 
   return (
     <>
-<nav className="bg-white shadow-lg">
-                <div className="max-w-7xl mx-auto px-4 py-2">
+ <nav className="bg-white shadow-lg">
+                <div className="mx-auto px-4 py-2 max-w-7xl">
                     <div className="flex justify-between items-center">
-                        <div className="flex items-center">
-                            <img src={logo} alt="Logo" className="h-10 w-auto" />
-                            <Link to="/" className="text-blue-500 text-lg font-bold ml-2 hover:text-blue-700">
-                                Financial Hub
-                            </Link>
+                        <div className="flex-shrink-0 flex items-center">
+                            <img src={Bull} alt="" className="h-10 w-auto" />
+                            <a href="#" className="text-blue-500 text-lg font-bold ml-2 hover:text-shadow text-shadow-blur-2">Financial hub</a>
                         </div>
                         <div className="md:hidden">
                             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-blue-500 hover:text-blue-700 focus:outline-none">
@@ -196,48 +192,31 @@ const BudgetApp = () => {
                                 </svg>
                             </button>
                         </div>
-                        <div className="hidden md:flex items-center space-x-4">
-                            <Link to="" className="text-blue-500 hover:text-blue-700 relative hover:border-b-2 hover:border-blue-500">
-                                Learn
-                            </Link>
-                            <span className="text-gray-400">|</span>
-                            <Link to="" className="text-blue-500 hover:text-blue-700 relative hover:border-b-2 hover:border-blue-500">
-                                Talk with experts
-                            </Link>
-                            <span className="text-gray-400">|</span>
-                            <Link to="" className="text-blue-500 hover:text-blue-700 relative hover:border-b-2 hover:border-blue-500">
-                                Contact Us
-                            </Link>
+                        <div className="hidden md:flex md:items-center md:justify-center flex-1">
+                          
+                                <a href="https://harmonious-swan-71ba72.netlify.app"  target="_blank" className="text-blue-500 hover:text-blue-700 mx-4 relative hover:text-shadow text-shadow-blur-2" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }}>Talk with Expert<span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span></a>
+                       
+                            <span className="text-gray-400 mx-2">|</span>
+                          
+                                <a href="https://www.bing.com/search?q=how+to+make+a+budget&form=ANNTH1&refig=F9B9D5F5326E4186A3DDD1F78FA596B1" target='_blank' className="text-blue-500  hover:text-shadow text-shadow-blur-2 hover:text-blue-700 mx-4 relative" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }} >Learn More<span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span></a>
+                      
                         </div>
-                        <div className="hidden md:flex items-center">
-                            <Link to="">
-                                <button className="text-black bg-transparent border border-blue-500 px-4 py-2 transition duration-300 transform hover:scale-105 hover:shadow-md hover:bg-blue-500 hover:text-white">
-                                    Back
-                                </button>
+                        <div className="hidden md:flex md:items-center">
+                            <Link to="/mainpage">
+                                <button className="text-black bg-transparent border border-blue-500 px-4 py-2 transition duration-300 transform hover:scale-105 hover:shadow-md hover:bg-blue-500 hover:text-white">Back</button>
                             </Link>
                         </div>
                     </div>
                 </div>
                 {/* Mobile Menu */}
                 <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
-                <div className="hidden md:flex items-center space-x-4">
-                            <Link to="" className="text-blue-500 hover:text-blue-700 relative hover:border-b-2 hover:border-blue-500">
-                                Learn
-                            </Link>
-                            <span className="text-gray-400">|</span>
-                            <Link to="" className="text-blue-500 hover:text-blue-700 relative hover:border-b-2 hover:border-blue-500">
-                                Talk with experts
-                            </Link>
-                            <span className="text-gray-400">|</span>
-                            <Link to="" className="text-blue-500 hover:text-blue-700 relative hover:border-b-2 hover:border-blue-500">
-                                Contact Us
-                            </Link>
-                        </div>
-                    <Link to="">
+                    <div className="bg-gray-50 py-4">
+                      <a href="https://www.bing.com/search?q=how+to+make+a+budget&form=ANNTH1&refig=F9B9D5F5326E4186A3DDD1F78FA596B1" target='_blank' className={`block py-2 px-4 text-sm text-blue-500 hover:bg-gray-100`}>Learn more</a>
+                        <a href="https://harmonious-swan-71ba72.netlify.app" target='_blank' className={`block py-2 px-4 text-sm text-blue-500 hover:bg-gray-100`} >Tal with expert</a>
+                    </div>
+                    <Link to="/mainpage">
                         <div className="bg-gray-100 py-4 px-4 flex justify-center">
-                            <button className="text-black bg-transparent border border-blue-500 hover:bg-blue-500 hover:text-white px-4 py-2 transition duration-300">
-                                Back
-                            </button>
+                            <button className="text-black bg-transparent border border-blue-500 hover:bg-blue-500 hover:text-white px-4 py-2 transition duration-300">Back</button>
                         </div>
                     </Link>
                 </div>
@@ -245,89 +224,122 @@ const BudgetApp = () => {
       <div className="budget-app__wrapper">
         <div className="budget-app__container">
           <div className="budget-app__sub-container">
-            <div className="budget-app__total-amount-container">
-              <h3>Budget</h3>
-              {budgetError && <p className="budget-app__error">{budgetError}</p>}
-              <input type="number" id="total-amount" placeholder="Enter Total Amount" className="bg-gray-100 border border-gray-300 rounded-md p-2 my-2" />
-              <button className="budget-app__submit bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600" onClick={handleSetBudget}>Set Budget</button>
+            <div className="budget-app__input-wrapper">
+              <h2 className="text-2xl font-bold mb-2">Total Budget</h2>
+              <input
+                type="number"
+                className="budget-app__input"
+                id="total-amount"
+                placeholder="Enter total budget"
+              />
+              {budgetError && <p className="text-red-500">{budgetError}</p>}
+                  <button
+                  className="budget-app__button mt-2 bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition duration-300 ease-in-out"
+                  onClick={handleSetBudget}
+                >
+                Set Budget
+              </button>
             </div>
-            <div className="budget-app__user-amount-container">
-              <h3>Expenses</h3>
-              {productTitleError && <p className="budget-app__error">{productTitleError}</p>}
-              <input type="text" className="budget-app__product-title bg-gray-100 border border-gray-300 rounded-md p-2 my-2" id="product-title" placeholder="Enter Title of Product" />
-              <input type="number" id="user-amount" placeholder="Enter Cost of Product" className="bg-gray-100 border border-gray-300 rounded-md p-2 my-2" />
+            <div className="budget-app__input-wrapper">
+              <h2 className="text-2xl font-bold mb-2">Add Expense</h2>
+              <input
+                type="text"
+                className="budget-app__input"
+                id="product-title"
+                placeholder="Enter product title"
+              />
+              <input
+                type="number"
+                className="budget-app__input"
+                id="user-amount"
+                placeholder="Enter amount"
+              />
               <select
+                className="budget-app__input"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="bg-gray-100 border border-gray-300 rounded-md p-2 my-2 cursor-pointer"
               >
                 <option value="">Select Category</option>
-                <option value="Food">Food</option>
-                <option value="Transport">Transport</option>
-                <option value="Shopping">Shopping</option>
-                <option value="Others">Others</option>
+                <option value="food">Food</option>
+                <option value="transportation">Transportation</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="bills">Bills</option>
+                <option value="other">Other</option>
               </select>
-              {isEditing ? (
-                <button className="budget-app__submit bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600" onClick={handleUpdateExpense}>Update Expense</button>
-              ) : (
-                <button className="budget-app__submit bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600" onClick={handleAddExpense}>Add Expense</button>
+              {productTitleError && (
+                <p className="text-red-500">{productTitleError}</p>
               )}
+              <button
+                className="budget-app__button mt-2"
+                onClick={isEditing ? handleUpdateExpense : handleAddExpense}
+              >
+                {isEditing ? 'Update Expense' : 'Add Expense'}
+              </button>
             </div>
           </div>
           <div className="budget-app__output-container flex justify-around mt-8">
-            <div className="text-center">
-              <p className="text-gray-600">Total Budget</p>
-              <span id="amount" className="text-2xl font-semibold">${budget}</span>
+            <div className="budget-app__output-item">
+              <h3 className="text-lg font-bold">Total Budget</h3>
+              <p id="amount">{budget}</p>
             </div>
-            <div className="text-center">
-              <p className="text-gray-600">Expenses</p>
-              <span id="expenditure-value" className="text-2xl font-semibold">${totalExpenses}</span>
+            <div className="budget-app__output-item">
+              <h3 className="text-lg font-bold">Total Expenses</h3>
+              <p id="expenditure-value">{totalExpenses}</p>
             </div>
-            <div className="text-center">
-              <p className="text-gray-600">Balance</p>
-              <span id="balance-amount" className="text-2xl font-semibold">${budget - totalExpenses}</span>
+            <div className="budget-app__output-item">
+              <h3 className="text-lg font-bold">Balance</h3>
+              <p id="balance-amount">{budget - totalExpenses}</p>
             </div>
           </div>
         </div>
         <div className="budget-app__list mt-8" id="list">
           <div className="budget-app__filter-container">
+            <label htmlFor="category-filter" className="font-bold mr-2">
+              Filter by Category:
+            </label>
             <select
+              id="category-filter"
+              className="budget-app__input"
               value={filterCategory}
               onChange={handleFilterChange}
-              className="bg-gray-100 border border-gray-300 rounded-md p-2 my-2 cursor-pointer"
             >
-              <option value="">Filter by Category</option>
-              <option value="Food">Food</option>
-              <option value="Transport">Transport</option>
-              <option value="Shopping">Shopping</option>
-              <option value="Others">Others</option>
+              <option value="">All</option>
+              <option value="food">Food</option>
+              <option value="transportation">Transportation</option>
+              <option value="entertainment">Entertainment</option>
+              <option value="bills">Bills</option>
+              <option value="other">Other</option>
             </select>
           </div>
           <h3 className="mt-4">Expense List</h3>
-          {filteredExpenses.map(expense => (
-            <div
-              className="sublist-content p-4 bg-gray-50 border-l-4 border-blue-500 mb-4 grid grid-cols-3 items-center rounded-lg shadow relative mt-12"
-              key={expense.id}
-              data-id={expense.id}
-            >
-              <p className="product font-medium">{expense.title} ({expense.category})</p>
-              <div className="amount text-center text-gray-700">${expense.amount.toFixed(2)}</div>
-              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex space-x-2">
-                <button
-                  className="edit text-green-500 hover:text-blue-700"
-                  onClick={() => handleEditExpense(expense.id, expense.title, expense.amount)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="delete text-red-500 hover:text-blue-700"
-                  onClick={() => handleDeleteExpense(expense.id, expense.amount)}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
+          <ul>
+            {filteredExpenses.map((expense) => (
+              <li
+                key={expense.id}
+                className="budget-app__list-item flex justify-between items-center mt-2"
+              >
+                <span className="font-bold">{expense.title}</span>
+                <span className="font-bold">{expense.amount}</span>
+                <span className="font-bold">{expense.category}</span>
+                <div className="flex items-center">
+                  <button
+                    className="budget-app__button mr-2"
+                    onClick={() =>
+                      handleEditExpense(expense.id, expense.title, expense.amount)
+                    }
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="budget-app__button"
+                    onClick={() => handleDeleteExpense(expense.id, expense.amount)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </>

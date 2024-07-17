@@ -19,8 +19,7 @@ import Stock from './Components/Stock.jsx';
 import ExchangeRateCalculator from './Components/Convert.jsx';
 import BudgetApp from './Components/BudgetApp.jsx';
 import TOdo from './Components/Todo.jsx';
-import NewsPage from './Components/NewsLanding.jsx';
-import Chat from './Components/Gemini.jsx';
+import NewsPage from './Components/NewsLanding.jsx';;
 import FinanceBlogLandingPage from './Components/Financiallanding.jsx';
 import BudgetLanding from './Components/BudgetLanding.jsx';
 import FeedbackReview from './Components/FeedbackReview.jsx';
@@ -28,6 +27,7 @@ import Mainpage from './Components/Mainpage.jsx';
 import ProfileCard from './Components/Developer.jsx';
 import BlogLanding from './Components/BlogLanding.jsx';
 import ForumLanding from './Components/ForumLanding.jsx';
+
 
 
 
@@ -57,12 +57,12 @@ function App() {
           <Route path='/Budget' element={<BudgetApp />} />
           <Route path='/FinancialLanding' element={<FinanceBlogLandingPage />} />
           <Route path='/Blanding' element={<BudgetLanding />} />
-          <Route path='/gemini' element={<Chat />} />
           <Route path='/customer' element={<FeedbackReview />} />
           <Route path='/mainpage' element={<Mainpage />} />
           <Route path='/developer' element={<ProfileCard />} />
           <Route path='/BlogLanding' element={<BlogLanding/>}/>
           <Route path='/ForumLanding' element={<ForumLanding/>}/>
+          <Route path='/NewsLanding' element={<NewsPage/>}/>
         </Routes>
       </BrowserRouter>
     </>

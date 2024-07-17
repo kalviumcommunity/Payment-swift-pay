@@ -11,7 +11,9 @@ const CustomNavbar = () => {
                 <div className="mx-auto px-4 py-2 max-w-7xl">
                     <div className="flex justify-between items-center">
                         <div className="flex-shrink-0 flex items-center">
-                            <img src={Bull} alt="" className="h-10 w-auto" />
+                        <a href="/mainpage">
+  <img src={Bull} alt="Bull" className="h-10 w-auto" />
+</a>
                             <a href="#" className="text-blue-500 text-lg font-bold ml-2 hover:text-shadow text-shadow-blur-2">Financial hub</a>
                         </div>
                         <div className="md:hidden">

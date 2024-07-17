@@ -155,18 +155,13 @@ const TOdo = () => {
         const taskDoc = doc(db, 'tasks', taskId);
         try {
             await updateDoc(taskDoc, updatedData);
+
+            // Delete task if completed
+            if (updatedData.completed) {
+                await deleteDoc(taskDoc);
+            }
         } catch (error) {
             console.error('Error updating task:', error);
-        }
-    };
-
-    // Delete a task
-    const deleteTask = async (taskId) => {
-        const taskDoc = doc(db, 'tasks', taskId);
-        try {
-            await deleteDoc(taskDoc);
-        } catch (error) {
-            console.error('Error deleting task:', error);
         }
     };
 
@@ -235,7 +230,7 @@ const TOdo = () => {
 
     return (
         <>
-        <nav className="bg-white shadow-lg">
+             <nav className="bg-white shadow-lg">
                 <div className="mx-auto px-4 py-2 max-w-7xl">
                     <div className="flex justify-between items-center">
                         <div className="flex-shrink-0 flex items-center">
@@ -254,21 +249,17 @@ const TOdo = () => {
                             </button>
                         </div>
                         <div className="hidden md:flex md:items-center md:justify-center flex-1">
-                            <Link to="/About">
-                                <a href="#" className="text-blue-500 hover:text-blue-700 mx-4 relative hover:text-shadow text-shadow-blur-2" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }}>About Us<span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span></a>
+                            <Link to="/mainpage">
+                                <a href="#" className="text-blue-500 hover:text-blue-700 mx-4 relative hover:text-shadow text-shadow-blur-2" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }}>Home<span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span></a>
                             </Link>
                             <span className="text-gray-400 mx-2">|</span>
-                            <Link to='/Service'>
-                                <a href="#" className="text-blue-500  hover:text-shadow text-shadow-blur-2 hover:text-blue-700 mx-4 relative" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }} >Services<span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span></a>
-                            </Link>
-                            <span className="text-gray-400 mx-2">|</span>
-                            <Link to="/contact"><a href="#" className="text-blue-500  hover:text-shadow text-shadow-blur-2 hover:text-blue-700 mx-4 relative" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }} >Contact Us
+                           <a href="https://www.wikihow.com/Keep-Track-of-Your-Personal-Finances" className="text-blue-500  hover:text-shadow text-shadow-blur-2 hover:text-blue-700 mx-4 relative" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }} >Learn more
                                 <span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span>
-                            </a></Link>
+                            </a>
                         </div>
                         <div className="hidden md:flex md:items-center">
-                            <Link to="/">
-                                <button className="text-black bg-transparent border border-blue-500 px-4 py-2 transition duration-300 transform hover:scale-105 hover:shadow-md hover:bg-blue-500 hover:text-white">Back</button>
+                            <Link to="">
+                                <button className="text-black bg-transparent border border-blue-500 px-4 py-2 transition duration-300 transform hover:scale-105 hover:shadow-md hover:bg-blue-500 hover:text-white">Get Started</button>
                             </Link>
                         </div>
                     </div>
@@ -280,164 +271,162 @@ const TOdo = () => {
                         <Link to='/Service'><a href="#" className={`block py-2 px-4 text-sm text-blue-500 hover:bg-gray-100`} >Services</a></Link>
                         <Link to='contact'><a href="#" className={`block py-2 px-4 text-sm text-blue-500 hover:bg-gray-100`} >Contact Us</a></Link>
                     </div>
-                    <Link to="/">
+                    <Link to="/mainpage">
                         <div className="bg-gray-100 py-4 px-4 flex justify-center">
                             <button className="text-black bg-transparent border border-blue-500 hover:bg-blue-500 hover:text-white px-4 py-2 transition duration-300">Back</button>
                         </div>
                     </Link>
                 </div>
             </nav>
-        
-        <div className="mx-auto py-10 px-4">
-            <h1 className="text-4xl font-bold text-center mb-8 text-blue-500">Fiscal Focus</h1>
 
-            {/* React Toastify container */}
-            <ToastContainer />
+            <div className=" mx-auto px-4 mt-8">
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-2xl font-bold text-gray-800">My Tasks</h2>
+                    <div className="flex items-center space-x-2">
+                        <select
+                            value={filterCategory}
+                            onChange={(e) => setFilterCategory(e.target.value)}
+                            className="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        >
+                            <option value="">All Categories</option>
+                            <option value="Work">Work</option>
+                            <option value="Personal">Personal</option>
+                            <option value="Shopping">Shopping</option>
+                            <option value="Others">Others</option>
+                        </select>
+                        <select
+                            value={sortOrder}
+                            onChange={(e) => setSortOrder(e.target.value)}
+                            className="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        >
+                            <option value="asc">Sort by Due Date (Ascending)</option>
+                            <option value="desc">Sort by Due Date (Descending)</option>
+                        </select>
+                    </div>
+                </div>
 
-            {/* Task addition form */}
-            <form onSubmit={addTask} className="w-full max-w-md mx-auto mb-6 p-4 rounded-lg bg-white shadow-lg">
-                <div className="flex flex-col space-y-4">
-                    <input
-                        type="text"
-                        placeholder="Add a new task"
-                        value={task}
-                        onChange={(e) => setTask(e.target.value)}
-                        className="input input-bordered input-primary w-full"
-                    />
-
-                    <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={addTask} className="mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <input
+                            type="text"
+                            placeholder="Task"
+                            value={task}
+                            onChange={(e) => setTask(e.target.value)}
+                            className="border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            required
+                        />
                         <select
                             value={priority}
                             onChange={(e) => setPriority(e.target.value)}
-                            className="select select-primary w-full"
+                            className="border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            required
                         >
-                            <option value="High">High</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Low">Low</option>
+                            <option value="Low">Low Priority</option>
+                            <option value="Medium">Medium Priority</option>
+                            <option value="High">High Priority</option>
                         </select>
-
                         <input
                             type="date"
                             value={dueDate}
                             onChange={(e) => setDueDate(e.target.value)}
-                            className="input input-bordered input-primary w-full"
+                            className="border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            required
                         />
+                        <input
+                            type="time"
+                            value={dueTime}
+                            onChange={(e) => setDueTime(e.target.value)}
+                            className="border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Category"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            className="border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Notes"
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            className="border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                        <select
+                            value={recurrence}
+                            onChange={(e) => setRecurrence(e.target.value)}
+                            className="border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        >
+                            <option value="">No Recurrence</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                        <button
+                            type="submit"
+                            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            Add Task
+                        </button>
                     </div>
+                </form>
 
-                    {/* Time input below date input */}
-                    <input
-                        type="time"
-                        value={dueTime}
-                        onChange={(e) => setDueTime(e.target.value)}
-                        className="input input-bordered input-primary w-full"
-                    />
-
-                    <input
-                        type="text"
-                        placeholder="Category"
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="input input-bordered input-primary w-full"
-                    />
-
-                    <textarea
-                        placeholder="Notes"
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        className="textarea textarea-bordered textarea-primary w-full"
-                    />
-
-                    <select
-                        value={recurrence}
-                        onChange={(e) => setRecurrence(e.target.value)}
-                        className="select select-primary w-full"
-                    >
-                        <option value="">No recurrence</option>
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                    </select>
-
-                    <button type="submit" className="btn btn-primary w-full mt-4">Add Task</button>
-                </div>
-            </form>
-
-            {/* Category filter and sort order selection */}
-            <div className="w-full max-w-md mx-auto mb-4">
-                <div className="flex justify-between items-center">
-                    <select
-                        value={filterCategory}
-                        onChange={(e) => setFilterCategory(e.target.value)}
-                        className="select select-primary"
-                    >
-                        <option value="">All Categories</option>
-                        {tasks.map((task, index) => (
-                            <option key={index} value={task.category}>{task.category}</option>
-                        ))}
-                    </select>
-
-                    <select
-                        value={sortOrder}
-                        onChange={(e) => setSortOrder(e.target.value)}
-                        className="select select-primary"
-                    >
-                        <option value="asc">Sort by Date: Ascending</option>
-                        <option value="desc">Sort by Date: Descending</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* Task table */}
-            <div className="w-full max-w-5xl mx-auto mt-6">
                 <div className="overflow-x-auto">
-                    <table className="table-auto w-full text-left bg-white shadow-md rounded-lg">
-                        <thead>
-                            <tr className="bg-gray-200 text-gray-700">
-                                <th className="px-4 py-2">Task</th>
-                                <th className="px-4 py-2">Priority</th>
-                                <th className="px-4 py-2">Due Date</th>
-                                <th className="px-4 py-2">Due Time</th>
-                                <th className="px-4 py-2">Category</th>
-                                <th className="px-4 py-2">Notes</th>
-                                <th className="px-4 py-2">Recurrence</th>
-                                <th className="px-4 py-2">Actions</th>
+                    <table className="min-w-full bg-white border-gray-300 border rounded">
+                        <thead className="bg-gray-200">
+                            <tr>
+                                <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                    Task
+                                </th>
+                                <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                    Priority
+                                </th>
+                                <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                    Due Date & Time
+                                </th>
+                                <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                    Category
+                                </th>
+                                <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                    Notes
+                                </th>
+                                <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                    Recurrence
+                                </th>
+                                <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                    Actions
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
-                            {tasks.map((task) => {
-                                const overdue = isTaskOverdue(task);
-                                return (
-                                    <tr key={task.id} className={`border-t ${overdue ? 'bg-red-300' : ''}`}>
-                                        <td className="px-4 py-2">{task.task}</td>
-                                        <td className="px-4 py-2">{task.priority}</td>
-                                        <td className="px-4 py-2">{task.dueDate}</td>
-                                        <td className="px-4 py-2">{task.dueTime || '00:00'}</td>
-                                        <td className="px-4 py-2">{task.category}</td>
-                                        <td className="px-4 py-2">{task.notes}</td>
-                                        <td className="px-4 py-2">{task.recurrence || 'None'}</td>
-                                        <td className="px-4 py-2 flex items-center space-x-2">
+                            {tasks.map((task) => (
+                                <tr key={task.id} className={isTaskOverdue(task) ? 'bg-red-100' : ''}>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex items-center">
                                             <input
                                                 type="checkbox"
                                                 checked={task.completed}
-                                                onChange={() => updateTask(task.id, { completed: !task.completed })}
-                                                className="checkbox checkbox-primary mr-2"
+                                                onChange={(e) => updateTask(task.id, { completed: e.target.checked })}
+                                                className="mr-2 form-checkbox h-5 w-5 text-blue-500 focus:ring-2 focus:ring-blue-500"
                                             />
-                                            <button
-                                                className="btn btn-danger btn-sm"
-                                                onClick={() => deleteTask(task.id)}
-                                            >
-                                                Delete
-                                            </button>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
+                                            <div className="text-sm font-medium text-gray-900">{task.task}</div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{task.priority}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{task.dueDate} {task.dueTime}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{task.category}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{task.notes}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{task.recurrence}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>
             </div>
-        </div>
-    </>
+            <ToastContainer />
+        </>
     );
 };
 
