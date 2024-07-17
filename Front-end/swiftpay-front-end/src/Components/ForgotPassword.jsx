@@ -3,6 +3,7 @@ import { auth } from '../../Firebase/Fire.config';
 import { toast } from 'react-toastify';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
+import { FaArrowLeft } from 'react-icons/fa';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -53,7 +54,13 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex justify-center items-center h-screen relative">
+      {/* Back Icon */}
+      <FaArrowLeft 
+        className="text-2xl cursor-pointer text-blue-500 absolute top-4 left-4"
+        onClick={() => navigate('/signIn-signUp')}
+      />
+
       <div className="w-full max-w-md p-8 bg-white bg-opacity-25 backdrop-filter backdrop-blur-lg rounded-lg shadow-lg">
         <h2 className="text-2xl font-semibold mb-4 text-center">Forgot Password</h2>
         
