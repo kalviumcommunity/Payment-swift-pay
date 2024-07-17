@@ -109,7 +109,7 @@ const NewsPage = () => {
                             Get the latest financial news stories from around the world delivered to your screen.
                         </motion.p>
                         <div className="flex space-x-4">
-                            <Link to="/Business">
+                            <a href="/Business" target='_blank'>
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
@@ -120,7 +120,7 @@ const NewsPage = () => {
                                 >
                                     Get started
                                 </motion.button>
-                            </Link>
+                            </a>
                             <Link to="/mainpage">
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
