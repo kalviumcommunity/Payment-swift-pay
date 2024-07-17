@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { auth } from '../../Firebase/Fire.config';
 import { useSpring, animated } from 'react-spring';
-import { FaComments, FaBlog, FaCalculator, FaChartLine, FaNewspaper, FaRobot, FaTwitter, FaFacebookF, FaInstagram, FaTasks, FaMoneyBillWave, FaBitcoin } from 'react-icons/fa';
+import { FaComments, FaBlog, FaCalculator, FaChartLine, FaNewspaper, FaRobot,  FaClock ,FaTasks, FaMoneyBillWave, FaBitcoin } from 'react-icons/fa';
 import Main from './Main';
 import { Link } from 'react-router-dom';
-import Footer from './Footer';
+import bull from './../images/Bull.png'
+import { FaFacebookF, FaTwitter, FaInstagram } from 'react-icons/fa';
 
 const translations = [
   { welcome: "स्वागत", financialHub: "वित्तीय केंद्र" }, // Hindi
@@ -125,14 +126,14 @@ const Mainpage = () => {
   return (
     <>
       <Main />
-      <div className="flex flex-col items-center py-10 ">
+      <div className="flex flex-col items-center py-10  ">
         {/* Welcome Section */}
         <div className="flex flex-col items-center px-6">
           <MultilingualWelcome userName={userName} />
         </div>
 
         {/* Features Section */}
-        <section className=" py-16 w-full">
+        <section className=" py-16 w-full mt-20">
           <div className="mx-auto px-4">
             <h2 className="text-4xl font-bold text-center text-blue-500 mb-8">Our Features</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -154,12 +155,24 @@ const Mainpage = () => {
                   <h3 className="text-xl font-semibold mb-2">Financial Forum</h3>
                 </div>
               </Link>
-              <Link to="/Exchange">
+              <a href="https://crypto-beryl-ten.vercel.app/" target="_blank" rel="noopener noreferrer">
+                <div className="flex flex-col items-center">
+                  <FaBitcoin className="text-blue-500 text-6xl mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Crypto Tracker</h3>
+                </div>
+              </a>
+              <a href="https://668963cdabe78a804ab44cef--chic-hotteok-93e044.netlify.app/" target="_blank" rel="noopener noreferrer">
+                <div className="flex flex-col items-center">
+                  <FaRobot className="text-blue-500 text-6xl mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">AI Services</h3>
+                </div>
+              </a>
+              <a href="/Exchange" target='_blank'>
                 <div className="flex flex-col items-center">
                   <FaMoneyBillWave className="text-blue-500 text-6xl mb-4" />
                   <h3 className="text-xl font-semibold mb-2">Currency Converter</h3>
                 </div>
-              </Link>
+              </a>
               <Link to="/To">
                 <div className="flex flex-col items-center">
                   <FaTasks className="text-blue-500 text-6xl mb-4" />
@@ -172,23 +185,64 @@ const Mainpage = () => {
                   <h3 className="text-xl font-semibold mb-2">News</h3>
                 </div>
               </Link>
-              <a href="https://668963cdabe78a804ab44cef--chic-hotteok-93e044.netlify.app/" target="_blank" rel="noopener noreferrer">
-                <div className="flex flex-col items-center">
-                  <FaRobot className="text-blue-500 text-6xl mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">AI Services</h3>
-                </div>
-              </a>
-              <a href="https://crypto-beryl-ten.vercel.app/" target="_blank" rel="noopener noreferrer">
-                <div className="flex flex-col items-center">
-                  <FaBitcoin className="text-blue-500 text-6xl mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Crypto Tracker</h3>
-                </div>
-              </a>
+              <Link>
+          <div className="flex flex-col items-center">
+            <FaClock className="text-blue-500 text-6xl mb-4" />
+            <h3 className="text-xl font-semibold mb-2">coming soon....</h3>
+          </div>
+        </Link>
+      
             </div>
           </div>
         </section>
       </div>
-      <Footer/>
+      <footer className="footer bg-blue-500 mt-16">
+            <div className="footer-content">
+            <div className="footer-section">
+               <img src={bull} alt="" className="w-12 h-12" />
+            </div>
+                <div className="footer-section">
+                    <h3 className='footer_titles' >Contact</h3>
+                    <p>123 Main St, City, Country</p>
+                    <p>Email: venkat@gmail.com</p>
+                    <p>Phone: +91 9498407843</p>
+                </div>
+
+                <div className="footer-section">
+                    <h3  className='footer_titles'>Quick Links</h3>
+                    <ul className="footer-links">
+                        <li><a className='footer_navigation' target='_blank' href="https://en.wikipedia.org/wiki/Finance">Histroy</a></li>
+                        <li><a className='footer_navigation' target='_blank' href="https://www.nseindia.com/">Indian stock market</a></li>
+                        <li><a className='footer_navigation' target='_blank' href="https://www.moneycontrol.com/markets/global-indices/">Stock market</a></li>
+                    </ul>
+                </div>
+
+                <div className="footer-section mr-10" id='use'>
+                    <h3 className='footer_titles'>Follow Us</h3>
+                    <ul className="footer-social">
+                        <li className='footer_social'>
+                            <a href="#facebook" className="footer_social-link">
+                                <FaFacebookF size={20} />
+                            </a>
+                        </li>
+                        <li className='footer_social'>
+                            <a href="#twitter" className="footer_social-link">
+                                <FaTwitter size={20} />
+                            </a>
+                        </li>
+                        <li className='footer_social'>
+                            <a href="#instagram" className="footer_social-link">
+                                <FaInstagram size={20} />
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div className="footer-copyright mt-3">
+                <p>&copy; {new Date().getFullYear()} Financial Hub Company. All rights reserved.</p>
+            </div>
+        </footer>
     </>
   );
 };

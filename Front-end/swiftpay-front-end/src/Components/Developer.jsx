@@ -20,7 +20,7 @@ const ProfileCard = () => {
         </button>
         <div className="flex flex-col md:flex-row bg-white rounded-lg overflow-hidden shadow-md h-full">
           <div className="md:w-1/3">
-            <img src="https://i.imgur.com/aCwpF7V.jpg" alt="Profile" className="w-full h-full object-cover" />
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFMvwlVTDLpEavp_RY959zJjT77ZLa8r7A_Q&s" alt="Profile" className="w-full h-full object-cover" />
           </div>
           <div className="md:w-2/3 flex flex-col">
             <div className="bg-gray-800 text-white p-5 flex justify-between items-center">

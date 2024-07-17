@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { FaChartLine, FaBook, FaNewspaper } from 'react-icons/fa';
 import ReactPlayer from 'react-player';
 import bull from './../images/Bull.png';
+import { Link } from 'react-router-dom';
+
 
 const BlogLanding = () => {
     // Sample data for latest blogs
@@ -76,7 +78,7 @@ const BlogLanding = () => {
                                     Explore Blogs
                                 </motion.button>
                             </a>
-                            <a href="/" target="_blank" rel="noopener noreferrer">
+                            <Link to="/mainpage"  rel="noopener noreferrer">
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
@@ -87,7 +89,7 @@ const BlogLanding = () => {
                                 >
                                     Home
                                 </motion.button>
-                            </a>
+                            </Link>
                         </div>
                     </div>
 

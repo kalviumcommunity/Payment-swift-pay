@@ -47,17 +47,7 @@ const Main = () => {
                             </button>
                         </div>
                         <div className="hidden md:flex md:items-center md:justify-center flex-1">
-                            <Link to="/mainpage">
-                                <a href="#" className="text-blue-500 hover:text-blue-700 mx-4 relative hover:text-shadow text-shadow-blur-2" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }}>Home<span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span></a>
-                            </Link>
-                            <span className="text-gray-400 mx-2">|</span>
-                            <Link to=''>
-                                <a href="#" className="text-blue-500  hover:text-shadow text-shadow-blur-2 hover:text-blue-700 mx-4 relative" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }} >Features<span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span></a>
-                            </Link>
-                            <span className="text-gray-400 mx-2">|</span>
-                            <Link to="/profile"><a href="#" className="text-blue-500  hover:text-shadow text-shadow-blur-2 hover:text-blue-700 mx-4 relative" onMouseEnter={(e) => { e.target.style.borderBottom = '2px solid blue' }} onMouseLeave={(e) => { e.target.style.borderBottom = 'none' }} >Profile
-                                <span className="absolute bottom-0 left-0 w-full border-b-2 border-blue-500 opacity-0 transition-opacity duration-300"></span>
-                            </a></Link>
+                           
                         </div>
                         <div className="hidden md:flex md:items-center">
                             <button onClick={handleLogout} className="text-black bg-transparent border border-blue-500 px-4 py-2 transition duration-300 transform hover:scale-105 hover:shadow-md hover:bg-blue-500 hover:text-white">Log out</button>
